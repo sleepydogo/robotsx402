@@ -76,7 +76,7 @@ class RoboticArm:
                 csv_path = settings.CSV_MATRIX_PATH
             except ImportError:
                 # Fallback to default path if config is not available
-                csv_path = "/Users/tom/solana-quantum/robot-api/rutinas-movimiento.csv"
+                csv_path = "rutinas-movimiento.csv"
 
         with open(csv_path, "r") as csvfile:
             csv_reader = csv.reader(csvfile)

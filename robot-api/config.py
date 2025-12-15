@@ -33,7 +33,7 @@ class Settings(BaseSettings):
     JPEG_QUALITY: int = 80  # JPEG compression quality (0-100)
 
     # Robotic Arm Configuration
-    CSV_MATRIX_PATH: str = "/Users/tom/solana-quantum/robot-api/rutinas-movimiento.csv"
+    CSV_MATRIX_PATH: str = "/home/robinson/robotsx402/robot-api/rutinas-movimiento.csv"
     SERIAL_BAUDRATE: int = 9600
     SERIAL_TIMEOUT: float = 3.0
 

@@ -160,7 +160,7 @@ CAMERA_HEIGHT=480
 CAMERA_FPS=30
 
 # Ruta al archivo CSV con posiciones del tablero
-CSV_MATRIX_PATH=/Users/tom/solana-quantum/robot-api/rutinas-movimiento.csv
+CSV_MATRIX_PATH=/home/robinson/robotsx402/robot-api/rutinas-movimiento.csv
 ```
 
 ## Seguridad
