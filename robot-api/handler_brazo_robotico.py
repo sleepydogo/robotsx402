@@ -5,11 +5,18 @@ import csv
 from serial.tools import list_ports
 
 def get_arduino_port():
-    ports = list_ports.comports()
-    for port in ports:
-        if "Arduino" in port.description or "usbmodem" in port.device:
-            return port.device
-    return None
+      ports = list_ports.comports()
+      for port in ports:
+          # Check common Arduino identifiers across platforms
+          if (
+              "Arduino" in port.description or
+              "usbmodem" in port.device or  # Mac: /dev/cu.usbmodem*, /dev/tty.usbmodem*
+              "ttyACM" in port.device or    # Linux: /dev/ttyACM*
+              "ttyUSB" in port.device or    # Linux: /dev/ttyUSB*
+              ("COM" in port.device and port.vid is not None)  # Windows: COM* with valid VID
+          ):
+              return port.device
+      return None
 
 class RoboticArm:
 
