@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Robot Control - Test Client</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 600;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            aspect-ratio: 4/3;
+        }
+
+        #videoStream {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .status {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .chess-board {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 2px;
+            margin-bottom: 15px;
+            background: #333;
+            padding: 2px;
+            border-radius: 8px;
+        }
+
+        .chess-square {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .chess-square.white {
+            background: #f0d9b5;
+        }
+
+        .chess-square.black {
+            background: #b58863;
+        }
+
+        .chess-square:hover {
+            opacity: 0.8;
+        }
+
+        .chess-square.selected {
+            outline: 3px solid #667eea;
+            outline-offset: -3px;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🤖 Chess Robot Control Panel</h1>
+
+        <div class="grid">
+            <!-- Video Stream -->
+            <div class="card">
+                <h2>📹 Live Camera Feed</h2>
+                <div class="video-container">
+                    <img id="videoStream" alt="Robot camera feed will appear here" />
+                </div>
+                <div id="streamStatus" class="status"></div>
+            </div>
+
+            <!-- Robot Control -->
+            <div class="card">
+                <h2>🎮 Robot Movement Control</h2>
+
+                <div class="form-group">
+                    <label>API Key</label>
+                    <input type="password" id="apiKey" placeholder="Enter your API key" value="as129skaSF1">
+                </div>
+
+                <div class="form-group">
+                    <label>Visual Board (Click to select positions)</label>
+                    <div class="chess-board" id="chessBoard"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>From Position (X, Y)</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <input type="number" id="fromX" placeholder="From X (0-7)" min="0" max="7" value="6">
+                        <input type="number" id="fromY" placeholder="From Y (0-7)" min="0" max="7" value="4">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>To Position (X, Y)</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <input type="number" id="toX" placeholder="To X (0-7)" min="0" max="7" value="4">
+                        <input type="number" id="toY" placeholder="To Y (0-7)" min="0" max="7" value="4">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Action Type</label>
+                    <select id="action">
+                        <option value="move">Move</option>
+                        <option value="capture">Capture (remove piece first)</option>
+                    </select>
+                </div>
+
+                <button onclick="executeMove()">Execute Move</button>
+
+                <div id="moveStatus" class="status"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:8001';
+        let selectedSquare = null;
+        let selectingFrom = true;
+
+        // Initialize chess board
+        function initChessBoard() {
+            const board = document.getElementById('chessBoard');
+            for (let x = 0; x < 8; x++) {
+                for (let y = 0; y < 8; y++) {
+                    const square = document.createElement('div');
+                    square.className = `chess-square ${(x + y) % 2 === 0 ? 'white' : 'black'}`;
+                    square.textContent = `${x},${y}`;
+                    square.dataset.x = x;
+                    square.dataset.y = y;
+                    square.onclick = () => selectSquare(x, y, square);
+                    board.appendChild(square);
+                }
+            }
+        }
+
+        function selectSquare(x, y, element) {
+            // Remove previous selection
+            const selected = document.querySelector('.chess-square.selected');
+            if (selected) selected.classList.remove('selected');
+
+            element.classList.add('selected');
+
+            if (selectingFrom) {
+                document.getElementById('fromX').value = x;
+                document.getElementById('fromY').value = y;
+                selectingFrom = false;
+            } else {
+                document.getElementById('toX').value = x;
+                document.getElementById('toY').value = y;
+                selectingFrom = true;
+            }
+        }
+
+        // Start video stream
+        let streamReader = null;
+
+        async function startStream() {
+            const apiKey = document.getElementById('apiKey').value;
+            const img = document.getElementById('videoStream');
+            const status = document.getElementById('streamStatus');
+
+            if (!apiKey) {
+                showStatus('streamStatus', 'Please enter your API key', 'error');
+                return;
+            }
+
+            // Stop previous stream if exists
+            if (streamReader) {
+                try {
+                    await streamReader.cancel();
+                } catch (e) {}
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/robot/stream`, {
+                    method: 'GET',
+                    headers: {
+                        'X-API-Key': apiKey
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                showStatus('streamStatus', 'Stream connected successfully!', 'success');
+
+                streamReader = response.body.getReader();
+                let buffer = new Uint8Array();
+
+                // Read and parse MJPEG stream
+                while (true) {
+                    const { done, value } = await streamReader.read();
+
+                    if (done) {
+                        break;
+                    }
+
+                    // Append new data to buffer
+                    const newBuffer = new Uint8Array(buffer.length + value.length);
+                    newBuffer.set(buffer);
+                    newBuffer.set(value, buffer.length);
+                    buffer = newBuffer;
+
+                    // Look for JPEG markers (0xFF, 0xD8 = start, 0xFF, 0xD9 = end)
+                    let startIdx = -1;
+                    let endIdx = -1;
+
+                    for (let i = 0; i < buffer.length - 1; i++) {
+                        if (buffer[i] === 0xFF && buffer[i + 1] === 0xD8) {
+                            startIdx = i;
+                        }
+                        if (buffer[i] === 0xFF && buffer[i + 1] === 0xD9 && startIdx !== -1) {
+                            endIdx = i + 2;
+                            break;
+                        }
+                    }
+
+                    // If we found a complete JPEG frame
+                    if (startIdx !== -1 && endIdx !== -1) {
+                        const jpegData = buffer.slice(startIdx, endIdx);
+                        const blob = new Blob([jpegData], { type: 'image/jpeg' });
+                        const url = URL.createObjectURL(blob);
+
+                        // Update image and revoke old URL
+                        const oldUrl = img.src;
+                        img.src = url;
+                        if (oldUrl && oldUrl.startsWith('blob:')) {
+                            URL.revokeObjectURL(oldUrl);
+                        }
+
+                        // Remove processed data from buffer
+                        buffer = buffer.slice(endIdx);
+                    }
+
+                    // Prevent buffer from growing too large
+                    if (buffer.length > 1024 * 1024) { // 1MB limit
+                        buffer = new Uint8Array();
+                    }
+                }
+
+            } catch (error) {
+                showStatus('streamStatus', `Failed to load stream: ${error.message}`, 'error');
+                streamReader = null;
+            }
+        }
+
+        // Execute robot move
+        async function executeMove() {
+            const apiKey = document.getElementById('apiKey').value;
+            const fromX = parseInt(document.getElementById('fromX').value);
+            const fromY = parseInt(document.getElementById('fromY').value);
+            const toX = parseInt(document.getElementById('toX').value);
+            const toY = parseInt(document.getElementById('toY').value);
+            const action = document.getElementById('action').value;
+
+            if (!apiKey) {
+                showStatus('moveStatus', 'Please enter your API key', 'error');
+                return;
+            }
+
+            if (isNaN(fromX) || isNaN(fromY) || isNaN(toX) || isNaN(toY)) {
+                showStatus('moveStatus', 'Please enter valid coordinates (0-7)', 'error');
+                return;
+            }
+
+            showStatus('moveStatus', 'Executing move...', 'info');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/robot/move`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-API-Key': apiKey
+                    },
+                    body: JSON.stringify({
+                        from: { x: fromX, y: fromY },
+                        to: { x: toX, y: toY },
+                        action: action
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showStatus('moveStatus',
+                        `Move executed successfully! From [${fromX},${fromY}] to [${toX},${toY}]`,
+                        'success'
+                    );
+                } else {
+                    showStatus('moveStatus',
+                        `Error: ${data.detail || 'Unknown error'}`,
+                        'error'
+                    );
+                }
+            } catch (error) {
+                showStatus('moveStatus',
+                    `Connection failed: ${error.message}. Make sure the server is running.`,
+                    'error'
+                );
+            }
+        }
+
+        function showStatus(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = `status ${type}`;
+            element.style.display = 'block';
+
+            if (type === 'success' || type === 'info') {
+                setTimeout(() => {
+                    element.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        // Initialize on load
+        window.onload = () => {
+            initChessBoard();
+
+            // Auto-start stream if API key is present
+            const apiKey = document.getElementById('apiKey').value;
+            if (apiKey) {
+                setTimeout(startStream, 500);
+            }
+        };
+
+        // Refresh stream when API key changes
+        document.getElementById('apiKey').addEventListener('change', startStream);
+    </script>
+</body>
+
+</html>

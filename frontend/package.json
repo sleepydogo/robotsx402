@@ -1,0 +1,38 @@
+{
+  "name": "x402-platform-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@particle-network/chains": "^1.8.3",
+    "@solana/spl-token": "^0.3.9",
+    "@solana/wallet-adapter-base": "^0.9.23",
+    "@solana/wallet-adapter-react": "^0.15.35",
+    "@solana/wallet-adapter-react-ui": "^0.9.35",
+    "@solana/wallet-adapter-wallets": "^0.19.32",
+    "@solana/web3.js": "^1.87.6",
+    "axios": "^1.6.5",
+    "clsx": "^2.1.1",
+    "framer-motion": "^10.18.0",
+    "lucide-react": "^0.309.0",
+    "next": "14.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "tailwind-merge": "^2.2.0",
+    "zustand": "^4.4.7"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "autoprefixer": "^10.0.1",
+    "postcss": "^8",
+    "tailwindcss": "^3.3.0",
+    "typescript": "^5"
+  }
+}

@@ -1,0 +1,69 @@
+# Solana / Anchor
+.anchor
+.DS_Store
+target/
+test-ledger/
+**/*.rs.bk
+**/*.swp
+
+# Node
+node_modules/
+.yarn/
+dist/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+*.so
+*.dylib
+*.dll
+
+# Testing
+coverage/
+.nyc_output/
+
+# Solana keys (IMPORTANTE: nunca commitear keys privadas)
+*.json
+!tsconfig.json
+!package.json
+!Anchor.toml
+
+# Cargo
+Cargo.lock
+**/*.rs.bk
+
+# Python (para scripts auxiliares)
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Deployment
+.vercel/
+.netlify/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
