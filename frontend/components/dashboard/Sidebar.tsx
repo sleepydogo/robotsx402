@@ -23,7 +23,7 @@ export default function Sidebar({ activeView, setActiveView }: SidebarProps) {
       <div className="p-6 flex items-center gap-3 border-b border-white/5 h-20">
         <Cpu className="text-neon-cyan w-8 h-8 shrink-0" />
         <span className="font-bold tracking-widest hidden lg:block text-lg">
-          x402<span className="text-neon-cyan">PLATFORM</span>
+          ROBOTS<span className="text-neon-cyan">x402</span>
         </span>
       </div>
 

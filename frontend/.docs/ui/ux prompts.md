@@ -1,6 +1,6 @@
 **ACT AS:** Expert UI/UX Designer specialized in "Futuristic Industrial" & "Cyberpunk" interfaces for Web3/DeFi applications.
 
-**PROJECT CONTEXT:** "NEXUS CORE": A decentralized platform for renting robotic hardware via Solana streaming payments. The aesthetic is a functional, military-grade sci-fi dashboard (HUD).
+**PROJECT CONTEXT:** "ROBOTSx402": A decentralized platform for renting robotic hardware via Solana streaming payments. The aesthetic is a functional, military-grade sci-fi dashboard (HUD).
 
 **DESIGN SYSTEM RULES (STRICT ADHERENCE):**
 

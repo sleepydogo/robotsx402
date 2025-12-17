@@ -5,10 +5,16 @@
   "scripts": {
     "test": "anchor test",
     "build": "anchor build",
-    "deploy": "anchor deploy --provider.cluster devnet"
+    "deploy": "anchor deploy --provider.cluster devnet",
+    "initialize": "ts-node scripts/deploy.ts",
+    "mint": "ts-node scripts/mint-tokens.ts",
+    "add-metadata": "ts-node scripts/add-metadata.ts"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.29.0",
+    "@metaplex-foundation/mpl-token-metadata": "^3.4.0",
+    "@metaplex-foundation/umi": "^1.4.1",
+    "@metaplex-foundation/umi-bundle-defaults": "^1.4.1",
     "@solana/spl-token": "^0.3.9",
     "@solana/web3.js": "^1.87.6"
   },

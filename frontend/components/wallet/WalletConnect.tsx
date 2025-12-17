@@ -35,7 +35,7 @@ export function WalletConnect() {
     setError(null);
 
     try {
-      const message = `Sign this message to login to x402 Platform\n\nWallet: ${publicKey.toBase58()}\nTimestamp: ${Date.now()}`;
+      const message = `Sign this message to login to ROBOTSx402 Platform\n\nWallet: ${publicKey.toBase58()}\nTimestamp: ${Date.now()}`;
       const messageBytes = new TextEncoder().encode(message);
       const signature = await signMessage(messageBytes);
       const base58Signature = bs58.encode(signature);

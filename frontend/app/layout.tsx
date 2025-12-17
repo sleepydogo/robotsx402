@@ -15,7 +15,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'x402 Platform - Decentralized Robot Hardware Rental',
+  title: 'ROBOTSx402 - Decentralized Robot Hardware Rental',
   description: 'Rent robotic hardware via Solana payments on the x402 protocol',
 };
 
