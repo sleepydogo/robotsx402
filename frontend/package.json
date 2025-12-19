@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@particle-network/chains": "^2.1.0",
+    "@particle-network/chains": "^1.14.15",
     "@solana/spl-token": "^0.4.9",
     "@solana/wallet-adapter-base": "^0.9.25",
     "@solana/wallet-adapter-react": "^0.15.35",
