@@ -42,11 +42,12 @@ async def verify_payment(
         raise HTTPException(status_code=403, detail="Not authorized to verify this payment")
 
     # Verify transaction on blockchain
+    # Note: memo verification is optional for now (SPL token transfers don't include memos easily)
     is_valid = await payment_verifier.verify_transaction(
         signature=verification.tx_signature,
         expected_amount=session.amount,
         recipient=session.recipient_address,
-        memo=session.id
+        memo=None  # Temporarily disabled - TODO: add memo support to SPL transfers
     )
 
     if not is_valid:
@@ -108,4 +109,135 @@ async def get_session_status(
         "created_at": session.created_at,
         "expires_at": session.expires_at,
         "paid_at": session.paid_at
+    }
+
+
+@router.get("/sessions/my")
+async def get_my_sessions(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    status: Optional[str] = None,
+    limit: int = 50
+):
+    """Get all payment sessions for the current user"""
+    from sqlalchemy import select, desc
+    from app.models.robot import Robot
+
+    # Query sessions from database
+    query = select(PaymentSessionDB).where(
+        PaymentSessionDB.user_id == str(current_user.id)
+    )
+
+    # Filter by status if provided
+    if status:
+        query = query.where(PaymentSessionDB.status == status)
+
+    # Order by created date (most recent first) and limit
+    query = query.order_by(desc(PaymentSessionDB.created_at)).limit(limit)
+
+    result = await db.execute(query)
+    sessions = result.scalars().all()
+
+    # Enrich sessions with robot information
+    enriched_sessions = []
+    for session in sessions:
+        # Get robot details
+        robot_query = select(Robot).where(Robot.id == session.robot_id)
+        robot_result = await db.execute(robot_query)
+        robot = robot_result.scalar_one_or_none()
+
+        session_data = {
+            "session_id": session.id,
+            "robot_id": session.robot_id,
+            "robot_name": robot.name if robot else "Unknown Robot",
+            "robot_image_url": robot.image_url if robot else None,
+            "amount": float(session.amount),
+            "currency": session.currency,
+            "status": session.status,
+            "tx_signature": session.tx_signature,
+            "created_at": session.created_at.isoformat(),
+            "expires_at": session.expires_at.isoformat(),
+            "paid_at": session.paid_at.isoformat() if session.paid_at else None,
+            "service": session.service_payload.get("service", "control") if session.service_payload else "control"
+        }
+        enriched_sessions.append(session_data)
+
+    return {
+        "sessions": enriched_sessions,
+        "total": len(enriched_sessions)
+    }
+
+
+@router.get("/stats/my")
+async def get_my_payment_stats(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get payment statistics for the current user"""
+    from sqlalchemy import select, func
+
+    # Total sessions
+    total_sessions_query = select(func.count()).select_from(PaymentSessionDB).where(
+        PaymentSessionDB.user_id == str(current_user.id)
+    )
+    total_sessions_result = await db.execute(total_sessions_query)
+    total_sessions = total_sessions_result.scalar() or 0
+
+    # Paid sessions
+    paid_sessions_query = select(func.count()).select_from(PaymentSessionDB).where(
+        PaymentSessionDB.user_id == str(current_user.id),
+        PaymentSessionDB.status == "paid"
+    )
+    paid_sessions_result = await db.execute(paid_sessions_query)
+    paid_sessions = paid_sessions_result.scalar() or 0
+
+    # Total spent
+    total_spent_query = select(func.sum(PaymentSessionDB.amount)).where(
+        PaymentSessionDB.user_id == str(current_user.id),
+        PaymentSessionDB.status == "paid"
+    )
+    total_spent_result = await db.execute(total_spent_query)
+    total_spent = float(total_spent_result.scalar() or 0)
+
+    # Last payment date
+    last_payment_query = select(PaymentSessionDB.paid_at).where(
+        PaymentSessionDB.user_id == str(current_user.id),
+        PaymentSessionDB.status == "paid"
+    ).order_by(PaymentSessionDB.paid_at.desc()).limit(1)
+    last_payment_result = await db.execute(last_payment_query)
+    last_payment = last_payment_result.scalar()
+
+    # Most used robot
+    most_used_robot_query = select(
+        PaymentSessionDB.robot_id,
+        func.count(PaymentSessionDB.robot_id).label('count')
+    ).where(
+        PaymentSessionDB.user_id == str(current_user.id),
+        PaymentSessionDB.status == "paid"
+    ).group_by(PaymentSessionDB.robot_id).order_by(func.count(PaymentSessionDB.robot_id).desc()).limit(1)
+
+    most_used_result = await db.execute(most_used_robot_query)
+    most_used_data = most_used_result.first()
+
+    most_used_robot = None
+    if most_used_data:
+        from app.models.robot import Robot
+        robot_query = select(Robot).where(Robot.id == most_used_data[0])
+        robot_result = await db.execute(robot_query)
+        robot = robot_result.scalar_one_or_none()
+        if robot:
+            most_used_robot = {
+                "robot_id": robot.id,
+                "robot_name": robot.name,
+                "session_count": most_used_data[1]
+            }
+
+    return {
+        "total_sessions": total_sessions,
+        "paid_sessions": paid_sessions,
+        "pending_sessions": total_sessions - paid_sessions,
+        "total_spent": total_spent,
+        "currency": "rUSD",
+        "last_payment_at": last_payment.isoformat() if last_payment else None,
+        "most_used_robot": most_used_robot
     }

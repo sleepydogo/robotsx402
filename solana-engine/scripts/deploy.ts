@@ -27,13 +27,9 @@ async function main() {
 
   const tx = await program.methods
     .initialize(decimals)
-    .accounts({
-      stablecoinState: stablecoinState,
+    .accountsPartial({
       mint: mintKeypair.publicKey,
       authority: provider.wallet.publicKey,
-      systemProgram: SystemProgram.programId,
-      tokenProgram: TOKEN_PROGRAM_ID,
-      rent: anchor.web3.SYSVAR_RENT_PUBKEY,
     })
     .signers([mintKeypair])
     .rpc();

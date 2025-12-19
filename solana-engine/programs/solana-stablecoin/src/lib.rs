@@ -1,5 +1,9 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Mint, Token, TokenAccount, MintTo, Burn, Transfer};
+use mpl_token_metadata::{
+    instructions::CreateMetadataAccountV3CpiBuilder,
+    types::DataV2,
+};
 
 declare_id!("9LSXCUkD7BD3wjWjtC18qbrPAcfwdo4LVCER8j6CKEDj");
 
@@ -138,6 +142,43 @@ pub mod solana_stablecoin {
         msg!("Authority transferred to: {}", new_authority);
         Ok(())
     }
+
+    pub fn create_metadata(
+        ctx: Context<CreateMetadata>,
+        name: String,
+        symbol: String,
+        uri: String,
+    ) -> Result<()> {
+        msg!("Creating metadata for token: {}", name);
+
+        let seeds = &[
+            b"stablecoin".as_ref(),
+            &[ctx.bumps.stablecoin_state],
+        ];
+        let signer = &[&seeds[..]];
+
+        CreateMetadataAccountV3CpiBuilder::new(&ctx.accounts.token_metadata_program.to_account_info())
+            .metadata(&ctx.accounts.metadata.to_account_info())
+            .mint(&ctx.accounts.mint.to_account_info())
+            .mint_authority(&ctx.accounts.stablecoin_state.to_account_info())
+            .payer(&ctx.accounts.authority.to_account_info())
+            .update_authority(&ctx.accounts.stablecoin_state.to_account_info(), true)
+            .system_program(&ctx.accounts.system_program.to_account_info())
+            .data(DataV2 {
+                name,
+                symbol,
+                uri,
+                seller_fee_basis_points: 0,
+                creators: None,
+                collection: None,
+                uses: None,
+            })
+            .is_mutable(true)
+            .invoke_signed(signer)?;
+
+        msg!("Metadata created successfully");
+        Ok(())
+    }
 }
 
 #[derive(Accounts)]
@@ -263,6 +304,32 @@ pub struct TransferAuthority<'info> {
     pub stablecoin_state: Account<'info, StablecoinState>,
 
     pub authority: Signer<'info>,
+}
+
+#[derive(Accounts)]
+pub struct CreateMetadata<'info> {
+    #[account(
+        seeds = [b"stablecoin"],
+        bump,
+        has_one = mint,
+        has_one = authority,
+    )]
+    pub stablecoin_state: Account<'info, StablecoinState>,
+
+    pub mint: Account<'info, Mint>,
+
+    /// CHECK: Metaplex will create this account
+    #[account(mut)]
+    pub metadata: UncheckedAccount<'info>,
+
+    #[account(mut)]
+    pub authority: Signer<'info>,
+
+    pub system_program: Program<'info, System>,
+
+    /// CHECK: Metaplex Token Metadata Program
+    #[account(address = mpl_token_metadata::ID)]
+    pub token_metadata_program: UncheckedAccount<'info>,
 }
 
 #[account]

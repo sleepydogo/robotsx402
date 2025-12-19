@@ -12,7 +12,7 @@ class PaymentSession(BaseModel):
     user_id: str
     robot_id: str
     amount: float
-    currency: str = "USDC"
+    currency: str = "rUSD"
     recipient_address: str
     status: str = "pending"  # pending | paid | expired
     tx_signature: Optional[str] = None

@@ -5,32 +5,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Filter, Clock, ChevronRight } from 'lucide-react';
 import { useRobots } from '@/lib/hooks/useRobots';
 import { useRouter } from 'next/navigation';
+import { RobotPaymentModal } from '@/components/payment/RobotPaymentModal';
 
-// --- MOCK DATA & CONSTANTS ---
+// --- CONSTANTS ---
 const CATEGORIES = ["All", "Bipedal", "Quadruped", "Industrial Arm", "Aerial"];
-
-const MOCK_ROBOTS = [
-  {
-    id: 1, name: "Atlas MK-4", type: "Bipedal", status: "available",
-    image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&q=80&w=1000",
-    pricePerSec: 0.0045, location: "Tokyo Node #4"
-  },
-  {
-    id: 2, name: "Spot Ranger X", type: "Quadruped", status: "busy",
-    image: "https://images.unsplash.com/photo-1535378437323-95288ac55952?auto=format&fit=crop&q=80&w=1000",
-    pricePerSec: 0.0020, location: "Berlin Node #1"
-  },
-  {
-    id: 3, name: "KUKA Arm V9", type: "Industrial Arm", status: "available",
-    image: "https://images.unsplash.com/photo-1561131668-f635d4bef984?auto=format&fit=crop&q=80&w=1000",
-    pricePerSec: 0.0080, location: "San Francisco Node #2"
-  },
-  {
-    id: 4, name: "Drone Scout O1", type: "Aerial", status: "maintenance",
-    image: "https://images.unsplash.com/photo-1506947411487-a56738267384?auto=format&fit=crop&q=80&w=1000",
-    pricePerSec: 0.0015, location: "Singapore Node #7"
-  },
-];
 
 const StatusBadge = ({ status }: { status: string }) => {
   const styles: any = {
@@ -53,16 +31,26 @@ export default function RobotFleet() {
   const router = useRouter();
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [selectedRobot, setSelectedRobot] = useState<any>(null);
 
-  const ROBOTS = apiRobots.length > 0 ? apiRobots.map(robot => ({
-    id: robot.id,
-    name: robot.name,
-    type: robot.services[0] || 'Unknown',
-    status: robot.status === 'active' ? 'available' : robot.status,
-    image: robot.image_url,
-    pricePerSec: parseFloat(robot.price.toString()),
-    location: "Buenos Aires"
-  })) : MOCK_ROBOTS;
+  const ROBOTS = apiRobots.length > 0 ? apiRobots.map(robot => {
+    // Find cheapest plan
+    const cheapestPlan = robot.rental_plans && robot.rental_plans.length > 0
+      ? robot.rental_plans.reduce((min, plan) => plan.price < min.price ? plan : min)
+      : { price: parseFloat(robot.price.toString()), duration_minutes: 10 };
+
+    return {
+      id: robot.id,
+      name: robot.name,
+      type: robot.services[0] || 'Unknown',
+      status: robot.status === 'active' ? 'available' : robot.status,
+      image: robot.image_url && robot.image_url.trim() !== '' ? robot.image_url : null,
+      pricePerSec: parseFloat(robot.price.toString()),
+      cheapestPlan: cheapestPlan,
+      location: "Buenos Aires"
+    };
+  }) : [];
 
   const filteredRobots = ROBOTS.filter((robot: any) => {
     const matchesCategory = activeCategory === "All" || robot.type === activeCategory;
@@ -70,8 +58,22 @@ export default function RobotFleet() {
     return matchesCategory && matchesSearch;
   });
 
-  const handleStartSession = (robotId: string | number) => {
-    router.push(`/control/${robotId}`);
+  const handleStartSession = (robot: any) => {
+    // Find the full robot data from apiRobots
+    const fullRobotData = apiRobots.find(r => r.id === robot.id);
+    if (fullRobotData) {
+      setSelectedRobot(fullRobotData);
+      setPaymentModalOpen(true);
+    }
+  };
+
+  const handlePaymentSuccess = (signature: string) => {
+    console.log('Payment successful:', signature);
+    // Close modal and navigate to control page
+    setPaymentModalOpen(false);
+    if (selectedRobot) {
+      router.push(`/control/${selectedRobot.id}`);
+    }
   };
 
   return (
@@ -124,8 +126,23 @@ export default function RobotFleet() {
               className="bg-white/5 border border-white/10 rounded-xl overflow-hidden hover:border-neon-cyan/50 transition-all group flex flex-col"
             >
               <div className="h-48 relative overflow-hidden bg-black">
-                <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: `url(${robot.image})` }}></div>
-                <div className="absolute inset-0 bg-gradient-to-t from-cyber-black via-transparent to-transparent"></div>
+                {robot.image ? (
+                  <>
+                    <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" style={{ backgroundImage: `url(${robot.image})` }}></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-cyber-black via-transparent to-transparent"></div>
+                  </>
+                ) : (
+                  <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="w-16 h-16 mx-auto mb-2 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
+                        <svg className="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                      <p className="text-xs text-gray-500 font-mono">No image</p>
+                    </div>
+                  </div>
+                )}
                 <div className="absolute top-3 left-3"><StatusBadge status={robot.status} /></div>
                 <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md px-2 py-1 rounded text-xs font-mono text-neon-cyan border border-neon-cyan/30">
                   {robot.location}
@@ -139,13 +156,17 @@ export default function RobotFleet() {
                     <p className="text-gray-400 text-sm">{robot.type}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-lg font-mono font-bold text-white">{robot.pricePerSec} <span className="text-xs text-gray-500">USDC/s</span></p>
+                    <p className="text-sm text-gray-400">From</p>
+                    <p className="text-lg font-mono font-bold text-white">
+                      {robot.cheapestPlan.price.toFixed(2)} <span className="text-xs text-gray-500">rUSD</span>
+                    </p>
+                    <p className="text-xs text-gray-500">{robot.cheapestPlan.duration_minutes} min</p>
                   </div>
                 </div>
                 <div className="mt-auto">
                   <button
                     disabled={robot.status !== 'available'}
-                    onClick={() => robot.status === 'available' && handleStartSession(robot.id)}
+                    onClick={() => robot.status === 'available' && handleStartSession(robot)}
                     className={`w-full py-3 rounded font-mono font-bold text-sm flex items-center justify-center gap-2 transition-all relative overflow-hidden group/btn ${robot.status === 'available' ? "bg-neon-cyan text-cyber-black hover:bg-white" : "bg-white/5 text-gray-500 cursor-not-allowed border border-white/5"}`}
                   >
                     {robot.status === 'available' ? <>START SESSION <ChevronRight size={16} className="group-hover/btn:translate-x-1 transition-transform" /></> : <>NOT AVAILABLE <Clock size={16} /></>}
@@ -157,11 +178,38 @@ export default function RobotFleet() {
         </AnimatePresence>
       </div>
 
-      {filteredRobots.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-20 text-gray-500">
-          <Filter size={48} className="mb-4 opacity-50" />
-          <p className="font-mono text-lg">No robots found.</p>
+      {ROBOTS.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <div className="p-6 rounded-full bg-white/5 border border-white/10 mb-4">
+            <Filter size={48} className="text-gray-500 opacity-50" />
+          </div>
+          <h3 className="text-xl font-bold text-white mb-2">No Robots Available</h3>
+          <p className="text-gray-400 font-mono text-sm max-w-md">
+            There are no robots available at the moment. Create your first robot to get started.
+          </p>
         </div>
+      )}
+
+      {ROBOTS.length > 0 && filteredRobots.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <div className="p-6 rounded-full bg-white/5 border border-white/10 mb-4">
+            <Filter size={48} className="text-gray-500 opacity-50" />
+          </div>
+          <h3 className="text-xl font-bold text-white mb-2">No Robots Found</h3>
+          <p className="text-gray-400 font-mono text-sm">
+            No robots match your current filters. Try adjusting your search.
+          </p>
+        </div>
+      )}
+
+      {/* Payment Modal */}
+      {selectedRobot && (
+        <RobotPaymentModal
+          isOpen={paymentModalOpen}
+          onClose={() => setPaymentModalOpen(false)}
+          robot={selectedRobot}
+          onPaymentSuccess={handlePaymentSuccess}
+        />
       )}
     </div>
   );

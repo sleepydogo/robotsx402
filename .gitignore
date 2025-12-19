@@ -6,6 +6,12 @@ test-ledger/
 **/*.rs.bk
 **/*.swp
 
+# Documentation (moved to .docs/)
+.docs/
+*.md
+!CLAUDE.md
+!README.md
+
 # Node
 node_modules/
 .yarn/
@@ -67,3 +73,15 @@ venv/
 *.tmp
 *.temp
 .cache/
+
+# Local database files
+*.db
+*.sqlite
+*.sqlite3
+
+# SSL certificates (managed by certbot)
+certbot/
+
+# Production environment
+.env
+.env.production

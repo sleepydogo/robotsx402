@@ -2,18 +2,19 @@ import { createUmi } from '@metaplex-foundation/umi-bundle-defaults';
 import { createMetadataAccountV3 } from '@metaplex-foundation/mpl-token-metadata';
 import {
   publicKey,
-  keypairIdentity
+  keypairIdentity,
+  createSignerFromKeypair
 } from '@metaplex-foundation/umi';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
 
-const MINT_ADDRESS = "REEMPLAZAR_CON_MINT_ADDRESS";
+const MINT_ADDRESS = "8r2xLuDRsf6sVrdgTKoBM2gmWoixfXb5fzLyDqdEHtMX";
 const TOKEN_NAME = "Robot USD";           
 const TOKEN_SYMBOL = "rUSD";
 const TOKEN_DESCRIPTION = "Stablecoin designed for robot and IoT service payments on the x402 protocol";
-const METADATA_URI = "https://arweave.net/REEMPLAZAR-CON-TU-URI";
+const METADATA_URI = "https://gateway.irys.xyz/K90PlNzt8g-Vvjgt4UYn22OuL5ixzxndTMZqCpLe_iw";
 
 // ============================================
 
@@ -39,13 +40,6 @@ async function main() {
   console.log("URI:", METADATA_URI);
   console.log("");
 
-  // Validar que se haya cambiado la dirección del mint
-  if (MINT_ADDRESS === "REEMPLAZAR_CON_MINT_ADDRESS") {
-    console.error("❌ Error: Debes reemplazar MINT_ADDRESS con la dirección real del mint");
-    console.error("   Obtén la dirección ejecutando deploy.ts primero");
-    process.exit(1);
-  }
-
   if (METADATA_URI.includes("REEMPLAZAR")) {
     console.warn("⚠️  Advertencia: METADATA_URI no ha sido configurado");
     console.warn("   El metadata JSON debe estar alojado en IPFS o servidor web");
@@ -54,11 +48,12 @@ async function main() {
 
   try {
     const mint = publicKey(MINT_ADDRESS);
+    const signer = createSignerFromKeypair(umi, walletKeypair);
 
     // Crear metadata account
     const tx = await createMetadataAccountV3(umi, {
       mint,
-      mintAuthority: walletKeypair,
+      mintAuthority: signer,
       updateAuthority: walletKeypair.publicKey,
       data: {
         name: TOKEN_NAME,
@@ -89,7 +84,7 @@ async function main() {
     console.log("🎉 Your token now has complete metadata!");
     console.log("   Wallets will display it as 'rUSD' with name and logo");
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("❌ Failed to add metadata:", error);
 
     if (error.message?.includes("already in use")) {

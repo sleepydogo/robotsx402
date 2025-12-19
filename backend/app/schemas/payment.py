@@ -18,6 +18,7 @@ class PaymentVerificationResponse(BaseModel):
 class ExecutePayload(BaseModel):
     service: str
     parameters: Dict[str, Any] = {}
+    rental_plan_index: Optional[int] = None  # Index of selected rental plan
 
 
 class ExecuteResponse(BaseModel):

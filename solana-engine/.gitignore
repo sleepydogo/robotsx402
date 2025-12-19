@@ -30,3 +30,10 @@ Cargo.lock
 
 # Solana
 .config/
+
+# Private & Sensitive Information
+TOKEN_DEPLOYMENT_PRIVATE.md
+*PRIVATE*.md
+*.private.md
+secrets/
+.secrets/

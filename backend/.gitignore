@@ -81,3 +81,11 @@ alembic/versions/*.pyc
 # Backup files
 *.bak
 *.backup
+uploads/
+
+# Redis
+dump.rdb
+
+# Test files
+test_*.py
+*_test.py

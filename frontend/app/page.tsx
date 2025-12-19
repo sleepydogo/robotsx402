@@ -3,7 +3,7 @@
 import React, { useRef } from 'react';
 import Link from 'next/link';
 import { motion, useScroll, useTransform, useMotionTemplate, useMotionValue } from 'framer-motion';
-import { ArrowRight, Cpu, Zap, Shield, ChevronRight, Radio, Disc, ExternalLink, Hexagon, Codesandbox } from 'lucide-react';
+import { ArrowRight, Cpu, Zap, Shield, ChevronRight, Radio, Disc, ExternalLink, Hexagon } from 'lucide-react';
 
 // --- Animation Variants Profesionales ---
 
@@ -110,6 +110,181 @@ const BackgroundEffects = () => {
   );
 };
 
+
+function TokenDeploymentSection() {
+  const contractAddress = "8r2xLuDRsf6sVrdgTKoBM2gmWoixfXb5fzLyDqdEHtMX";
+  const explorerUrl = `https://explorer.solana.com/address/${contractAddress}?cluster=devnet`;
+
+  // Generamos 8 capas para crear el "grosor" del borde de la moneda
+  const coinLayers = Array.from({ length: 8 });
+
+  return (
+    <section className="py-24 px-6 relative overflow-hidden">
+      <div className="max-w-5xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="relative bg-cyber-black/40 border border-white/10 rounded-[40px] p-10 backdrop-blur-3xl overflow-hidden shadow-2xl"
+        >
+          {/* Fondo técnico decorativo */}
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 pointer-events-none"></div>
+          
+          <div className="flex flex-col md:flex-row items-center gap-16 relative z-10">
+            
+            {/* --- VISUAL DE LA MONEDA 3D --- */}
+            <div className="relative perspective-1000 py-10">
+              <motion.div
+                animate={{ 
+                  rotateY: 360,
+                  rotateX: [0, 5, 0], // Ligero giro en X para más dinamismo
+                  y: [0, -15, 0]
+                }}
+                transition={{ 
+                  rotateY: { duration: 8, repeat: Infinity, ease: "linear" },
+                  rotateX: { duration: 4, repeat: Infinity, ease: "easeInOut" },
+                  y: { duration: 4, repeat: Infinity, ease: "easeInOut" }
+                }}
+                style={{ 
+                  transformStyle: "preserve-3d",
+                  willChange: "transform" // Optimización para animaciones
+                }}
+                className="relative w-48 h-48 md:w-56 md:h-56 flex items-center justify-center"
+              >
+                {/* CAPAS DE PROFUNDIDAD (El borde de la moneda) */}
+                {coinLayers.map((_, i) => (
+                  <div
+                    key={i}
+                    style={{ 
+                      transform: `translateZ(${i - 4}px)`,
+                      backfaceVisibility: "hidden"
+                    }}
+                    className="absolute inset-0 rounded-full border-[6px] border-white/5 bg-gradient-to-br from-gray-800 via-cyber-black to-gray-900 shadow-inner"
+                  />
+                ))}
+
+                {/* CARA FRONTAL (El Logo) */}
+                <div 
+                  style={{ transform: "translateZ(5px)" }}
+                  className="absolute inset-0 rounded-full bg-gradient-to-br from-cyber-black via-gray-900 to-cyber-black border-4 border-neon-cyan/40 flex items-center justify-center overflow-hidden shadow-[inset_0_0_30px_rgba(0,243,255,0.3)]"
+                >
+                  {/* Brillo metálico dinámico animado */}
+                  <motion.div 
+                    animate={{ x: [-100, 100] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+                  />
+                  
+                  <img 
+                    src="/static/logo.png" 
+                    alt="Token Logo Front" 
+                    className="relative z-10 w-9/5 h-9/5 object-contain filter drop-shadow(0 0 12px rgba(0,243,255,0.6))"
+                  />
+                </div>
+
+                {/* CARA TRASERA (Reverso de la moneda) */}
+                <div 
+                  style={{ transform: "translateZ(-5px) rotateY(180deg)" }}
+                  className="absolute inset-0 rounded-full bg-cyber-black border-4 border-solana/40 flex items-center justify-center"
+                >
+                   {/* Logo en el reverso con efecto grabado */}
+                   <img 
+                    src="/static/logo.png" 
+                    alt="Token Logo Back" 
+                    className="w-4/5 h-4/5 object-contain opacity-20 grayscale filter invert"
+                  />
+                </div>
+              </motion.div>
+
+              {/* Sombra proyectada en el suelo, animada en sincronía */}
+              <motion.div 
+                animate={{ scale: [1, 1.2, 1], opacity: [0.2, 0.4, 0.2] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-40 h-8 bg-neon-cyan/20 blur-2xl rounded-[100%]"
+              />
+            </div>
+
+            {/* --- INFO DEL CONTRATO --- */}
+            <div className="flex-1 w-full space-y-8">
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                   <div className="h-px flex-1 bg-gradient-to-r from-transparent to-neon-cyan/50"></div>
+                   <span className="font-mono text-[10px] text-neon-cyan uppercase tracking-[0.3em]">SPL Token Standard</span>
+                   <div className="h-px flex-1 bg-gradient-to-l from-transparent to-neon-cyan/50"></div>
+                </div>
+
+                <h2 className="text-4xl md:text-6xl font-black tracking-tighter uppercase italic">
+                  <span className="text-neon-cyan">rUSD</span>
+                  <span className="text-white text-2xl ml-3 font-normal">Token</span>
+                </h2>
+
+                <p className="text-gray-400 text-sm leading-relaxed">
+                  <span className="text-white font-semibold">Robot USD (rUSD)</span> is our native stablecoin designed exclusively for <span className="text-neon-cyan">robotic and IoT service payments</span> on the X402 protocol. Every transaction is instant, transparent, and secured by the Solana blockchain.
+                </p>
+              </div>
+
+              <div className="space-y-4">
+                <div className="bg-white/[0.03] border border-white/10 p-5 rounded-none skew-x-[-10deg] transition-all hover:border-neon-cyan/50">
+                  <div className="skew-x-[10deg]">
+                    <p className="text-[10px] text-gray-500 font-bold uppercase mb-2">Token Mint Address</p>
+                    <code className="text-xs md:text-sm text-neon-cyan font-mono break-all">
+                      {contractAddress}
+                    </code>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="bg-white/5 p-4 border-l-2 border-solana">
+                    <span className="block text-[10px] text-gray-500 uppercase font-bold">Network</span>
+                    <span className="text-white font-mono flex items-center gap-2">
+                       <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                       DEVNET
+                    </span>
+                  </div>
+                  <div className="bg-white/5 p-4 border-l-2 border-neon-cyan">
+                    <span className="block text-[10px] text-gray-500 uppercase font-bold">Standard</span>
+                    <span className="text-white font-mono">SPL TOKEN</span>
+                  </div>
+                  <div className="bg-white/5 p-4 border-l-2 border-purple-500">
+                    <span className="block text-[10px] text-gray-500 uppercase font-bold">Decimals</span>
+                    <span className="text-white font-mono">6</span>
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-neon-cyan/10 to-transparent border border-neon-cyan/20 p-4 rounded-lg">
+                  <p className="text-[10px] text-neon-cyan font-bold uppercase mb-2 flex items-center gap-2">
+                    <Shield size={12} />
+                    Use Case
+                  </p>
+                  <p className="text-xs text-gray-300 leading-relaxed">
+                    rUSD is exclusively used for <span className="text-white font-semibold">robot service payments</span> on the X402 protocol. Each transaction represents real hardware usage time, ensuring transparent and fair billing for IoT operations.
+                  </p>
+                </div>
+              </div>
+
+              <a href={explorerUrl} target="_blank" rel="noopener noreferrer" className="block group">
+                <SpotlightButton className="w-full bg-neon-cyan text-black h-16 rounded-none font-black uppercase tracking-[0.2em] relative overflow-hidden">
+                  <span className="relative z-10 flex items-center justify-center gap-3">
+                    <ExternalLink size={20} />
+                    View on Solana Explorer
+                  </span>
+                  <div className="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                </SpotlightButton>
+              </a>
+
+              <div className="pt-4 border-t border-white/10">
+                <p className="text-[10px] text-gray-500 text-center font-mono">
+                  Secured by Solana blockchain • Powered by Anchor Framework
+                </p>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
 export default function LandingPage() {
   return (
     <div className="relative min-h-screen text-white overflow-hidden selection:bg-neon-cyan/30 selection:text-white font-sans">
@@ -123,8 +298,8 @@ export default function LandingPage() {
             className="flex items-center gap-2 font-bold text-xl tracking-wider group cursor-pointer"
           >
             <Cpu className="text-neon-cyan group-hover:rotate-180 transition-transform duration-700 ease-in-out" />
-            <span>ROBOTSx402<span className="text-neon-cyan relative">
-              PLATFORM
+            <span>ROBOTS<span className="text-neon-cyan relative">
+              x402
               <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-neon-cyan group-hover:w-full transition-all duration-300"></span>
             </span></span>
           </motion.div>
@@ -175,7 +350,7 @@ export default function LandingPage() {
               </motion.div>
 
               <motion.p variants={fadeInUpVariants} initial="hidden" animate="visible" transition={{ delay: 0.6 }} className="text-lg text-gray-300 max-w-xl leading-relaxed md:pr-10">
-                Access a global fleet of robotic and IoT hardware. Pay for operation time by the second using stablecoins on the Solana network, powered by the X402 payment streaming standard.
+                Access a global fleet of robotic and IoT hardware. Pay for operation time by the second using <span className="text-neon-cyan font-semibold">rUSD</span>, our native stablecoin on the Solana network, powered by the X402 payment streaming standard.
               </motion.p>
 
               <motion.div variants={fadeInUpVariants} initial="hidden" animate="visible" transition={{ delay: 0.8 }} className="flex flex-wrap gap-5">
@@ -190,7 +365,7 @@ export default function LandingPage() {
                   rel="noopener noreferrer"
                 >
                   <SpotlightButton className="px-8 py-4 rounded-md font-bold text-lg flex items-center gap-2 border border-white/20 text-white bg-white/5 hover:bg-white/10 transition-all font-mono">
-                    <Codesandbox size={20} /> X402 Documentation
+                    <ExternalLink size={20} /> X402 Documentation
                   </SpotlightButton>
                 </a>
 
@@ -238,11 +413,12 @@ export default function LandingPage() {
               </div>
 
               {/* Efectos de brillo detrás del contenedor */}
-              <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3/4 h-3/4 bg-neon-cyan/10 blur-[100px] rounded-full"></div>
+              <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-9/5 h-9/5 bg-neon-cyan/10 blur-[100px] rounded-full"></div>
             </motion.div>
           </div>
         </section>
 
+        <TokenDeploymentSection />
 
         {/* --- X402 EXPLANATION SECTION (Tarjetas con borde giratorio) --- */}
         <section className="py-32 relative">
@@ -258,9 +434,9 @@ export default function LandingPage() {
               transition={{ duration: 0.8 }}
               className="text-center max-w-3xl mx-auto mb-20"
             >
-              <h2 className="text-4xl md:text-5xl font-bold mb-6">The Engine: <span className="text-transparent bg-clip-text bg-gradient-to-br from-white to-gray-500">X402 Protocol</span></h2>
+              <h2 className="text-4xl md:text-5xl font-bold mb-6">How It Works: <span className="text-transparent bg-clip-text bg-gradient-to-br from-neon-cyan to-solana">X402 Protocol</span></h2>
               <p className="text-gray-400 text-xl leading-relaxed">
-                Forget monthly subscriptions. Our platform uses a payment streaming standard so you only pay for the exact time or operations when you control the hardware.
+                No subscriptions. No commitments. Pay only for what you use. The X402 protocol enables <span className="text-white font-semibold">pay-per-second billing</span> using rUSD tokens, so you're charged only for the exact time you control the robot.
               </p>
             </motion.div>
 
@@ -269,24 +445,28 @@ export default function LandingPage() {
               {/* Ficha Técnica 1 */}
               <HoverCard
                 icon={<Zap size={28} />}
-                title="1. Instant Connection"
-                description="Connect your Solana wallet (Phantom, Solflare). No traditional registration required. Your key is your access."
+                title="1. Wallet Connection"
+                description="Connect your Solana wallet (Phantom, Solflare, or any SPL-compatible wallet). No email, no passwords. Your wallet is your identity and access key."
                 accentColor="text-neon-cyan"
                 borderColor="from-neon-cyan/50"
               />
 
-              {/* Ficha Técnica 2 - CON MENCION THIRDWEB */}
+              {/* Ficha Técnica 2 - CON MENCION THIRDWEB Y rUSD */}
               <HoverCard
                 icon={<Cpu size={28} />}
-                title="2. Payment Streaming"
-                description="When you take control, an X402 payment channel opens. USDC flows from your wallet to the robot second by second."
+                title="2. Pay-Per-Second with rUSD"
+                description="When you take control of a robot, an X402 payment session begins. rUSD flows from your wallet to the robot owner automatically—billed by the second. Stop controlling, stop paying."
                 accentColor="text-solana"
                 borderColor="from-solana/50"
               >
-                <div className="mt-6">
-                  <a href="https://thirdweb.com" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-xs font-mono bg-white/5 border border-white/10 px-3 py-1.5 rounded-full text-gray-300 hover:text-white hover:border-solana/50 transition-all group">
-                    <Hexagon size={14} className="text-solana group-hover:rotate-90 transition-transform" />
-                    Infrastructure Managed by <span className="font-bold">Thirdweb</span>
+                <div className="mt-6 flex flex-col gap-2">
+                  <div className="inline-flex items-center gap-2 text-xs font-mono bg-neon-cyan/10 border border-neon-cyan/30 px-3 py-1.5 rounded-full text-neon-cyan">
+                    <Radio size={14} className="animate-pulse" />
+                    Powered by <span className="font-bold">rUSD Token</span>
+                  </div>
+                  <a href="https://thirdweb.com" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-xs font-mono bg-white/5 border border-white/10 px-3 py-1.5 rounded-full text-gray-300 hover:text-white hover:border-purple-400/50 transition-all group">
+                    <Hexagon size={14} className="text-purple-400 group-hover:rotate-90 transition-transform" />
+                    X402 Payment Infrastructure by <span className="font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">Thirdweb</span>
                   </a>
                 </div>
               </HoverCard>
@@ -294,8 +474,8 @@ export default function LandingPage() {
               {/* Ficha Técnica 3 */}
               <HoverCard
                 icon={<Shield size={28} />}
-                title="3. Trustless Control"
-                description="If the payment flow stops, control is instantly revoked. Security guaranteed by smart contracts."
+                title="3. Trustless & Secure"
+                description="All payments are verified on-chain via Solana smart contracts. If payment stops or fails, robot access is immediately revoked. Zero trust required—blockchain enforces the rules."
                 accentColor="text-emerald-400"
                 borderColor="from-emerald-400/50"
               />
@@ -323,30 +503,44 @@ export default function LandingPage() {
             <div className="flex flex-col items-center md:items-end gap-3">
               <span className="text-[10px] text-gray-500 uppercase tracking-[0.2em] font-bold">Decentralized Infrastructure</span>
 
-              <div className="flex items-center gap-2 bg-white/[0.03] border border-white/[0.08] p-2 pr-4 rounded-lg backdrop-blur-md">
-                {/* Solana Badge */}
-                <div className="flex items-center gap-2 text-gray-300 text-sm font-mono px-2">
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-solana opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-solana"></span>
-                  </span>
-                  Solana
-                </div>
-                <div className="w-px h-6 bg-white/10 mx-2"></div>
+              <div className="flex flex-col gap-2">
+                {/* Primera fila: Solana + rUSD */}
+                <div className="flex items-center gap-3 bg-white/[0.03] border border-white/[0.08] p-2.5 pr-4 rounded-lg backdrop-blur-md">
+                  {/* Solana Badge */}
+                  <div className="flex items-center gap-2 text-gray-300 text-sm font-mono">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-solana opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-solana"></span>
+                    </span>
+                    <span className="font-bold text-white">Solana Devnet</span>
+                  </div>
 
-                {/* Thirdweb Badge (Principal) */}
+                  <div className="w-px h-6 bg-white/10"></div>
+
+                  {/* rUSD Badge */}
+                  <div className="flex items-center gap-2 text-sm font-mono">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-neon-cyan opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-neon-cyan"></span>
+                    </span>
+                    <span className="text-gray-300">Powered by</span>
+                    <span className="font-bold text-neon-cyan">rUSD</span>
+                  </div>
+                </div>
+
+                {/* Segunda fila: Thirdweb */}
                 <a
                   href="https://thirdweb.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex items-center gap-2 text-sm font-mono text-gray-300 hover:text-white transition-colors"
+                  className="group flex items-center gap-2 text-xs font-mono bg-white/[0.03] border border-white/[0.08] p-2 pr-3 rounded-lg backdrop-blur-md text-gray-300 hover:text-white hover:border-purple-400/30 transition-all"
                 >
-                  <Hexagon size={14} className="text-white group-hover:text-purple-400 transition-colors" />
-                  <span>Powered by</span>
+                  <Hexagon size={14} className="text-purple-400 group-hover:rotate-90 transition-transform" />
+                  <span>X402 Payment Management by</span>
                   <span className="font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
                     Thirdweb
                   </span>
-                  <ExternalLink size={12} className="opacity-50 group-hover:opacity-100 transition-opacity -translate-y-[1px]" />
+                  <ExternalLink size={12} className="opacity-50 group-hover:opacity-100 transition-opacity" />
                 </a>
               </div>
             </div>
@@ -360,7 +554,14 @@ export default function LandingPage() {
 
 // --- Componente de Tarjeta con Efecto de Borde Giratorio ---
 // Este es un componente clave para el look "profesional"
-function HoverCard({ icon, title, description, accentColor, borderColor, children }) {
+function HoverCard({ icon, title, description, accentColor, borderColor, children }: {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  accentColor: string;
+  borderColor: string;
+  children?: React.ReactNode;
+}) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -371,7 +572,7 @@ function HoverCard({ icon, title, description, accentColor, borderColor, childre
       className="relative group rounded-2xl bg-cyber-black/40 p-[1px] overflow-hidden"
     >
       {/* El gradiente giratorio del borde */}
-      <div animate={{ rotate: 360 }} transition={{ duration: 4, repeat: Infinity, ease: "linear" }} className={`absolute inset-[-100%] bg-gradient-to-r ${borderColor} via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-sm`} />
+      <motion.div animate={{ rotate: 360 }} transition={{ duration: 4, repeat: Infinity, ease: "linear" }} className={`absolute inset-[-100%] bg-gradient-to-r ${borderColor} via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-sm`} />
 
       <div className="relative h-full bg-cyber-black/80 border border-white/10 p-8 rounded-2xl backdrop-blur-xl overflow-hidden z-10">
         <div className={`absolute top-0 right-0 -mt-12 -mr-12 w-32 h-32 bg-gradient-to-br ${borderColor} to-transparent opacity-10 blur-2xl group-hover:opacity-30 transition-opacity duration-500`}></div>

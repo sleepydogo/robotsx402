@@ -18,7 +18,7 @@ class SolanaPaymentVerifier:
         memo: Optional[str] = None,
     ) -> bool:
         """
-        Verify a Solana transaction matches expected payment parameters
+        Verify a Solana SPL token (rUSD) transaction matches expected payment parameters
         """
         try:
             # Parse signature
@@ -38,6 +38,7 @@ class SolanaPaymentVerifier:
                 await asyncio.sleep(1)
 
             if tx_response.value is None:
+                print(f"Transaction not found: {signature}")
                 return False
 
             tx = tx_response.value
@@ -45,34 +46,50 @@ class SolanaPaymentVerifier:
 
             # Check if transaction was successful
             if meta.err is not None:
+                print(f"Transaction failed with error: {meta.err}")
                 return False
 
             # Get transaction details
             instructions = tx.transaction.transaction.message.instructions
+
+            # Expected amount in token units (6 decimals for rUSD)
+            RUSD_DECIMALS = 6
+            expected_token_amount = int(expected_amount * (10 ** RUSD_DECIMALS))
 
             # Verify transfer instruction
             transfer_found = False
             memo_found = memo is None  # If no memo required, skip check
 
             for idx, instruction in enumerate(instructions):
-                # Check for transfer instruction
+                # Check for SPL token transfer instruction
                 if hasattr(instruction, 'parsed'):
                     parsed = instruction.parsed
                     if isinstance(parsed, dict):
                         info = parsed.get('info', {})
                         instruction_type = parsed.get('type', '')
 
-                        # Check transfer
-                        if instruction_type == 'transfer':
-                            actual_recipient = info.get('destination', '')
-                            lamports = info.get('lamports', 0)
+                        # Check for SPL token transfer (type: "transfer" or "transferChecked")
+                        if instruction_type in ['transfer', 'transferChecked']:
+                            # Get token amount
+                            token_amount = info.get('amount')
+                            if isinstance(token_amount, str):
+                                token_amount = int(token_amount)
 
-                            # Convert lamports to SOL (or USDC depending on token)
-                            # For now assuming SOL, adjust for SPL token
-                            actual_amount = lamports / 1_000_000_000
+                            # For transferChecked, amount is in 'tokenAmount'
+                            if instruction_type == 'transferChecked':
+                                token_amount_info = info.get('tokenAmount', {})
+                                token_amount = int(token_amount_info.get('amount', 0))
 
-                            if actual_recipient == recipient and abs(actual_amount - expected_amount) < 0.0001:
+                            print(f"Found SPL transfer: type={instruction_type}, amount={token_amount}, expected={expected_token_amount}")
+                            print(f"Transfer info: {info}")
+
+                            # Tolerance: allow 0.01 rUSD difference (10000 token units)
+                            tolerance = 10000
+                            if abs(token_amount - expected_token_amount) <= tolerance:
                                 transfer_found = True
+                                print(f"✓ Transfer amount verified: {token_amount} ~= {expected_token_amount}")
+                            else:
+                                print(f"✗ Amount mismatch: {token_amount} vs {expected_token_amount}")
 
                 # Check for memo instruction
                 if memo and hasattr(instruction, 'data'):
@@ -80,13 +97,17 @@ class SolanaPaymentVerifier:
                         instruction_data = str(instruction.data)
                         if memo in instruction_data:
                             memo_found = True
+                            print(f"Memo found: {memo}")
                     except:
                         pass
 
+            print(f"Verification result: transfer_found={transfer_found}, memo_found={memo_found}")
             return transfer_found and memo_found
 
         except Exception as e:
             print(f"Error verifying transaction: {e}")
+            import traceback
+            traceback.print_exc()
             return False
 
     async def get_transaction_status(

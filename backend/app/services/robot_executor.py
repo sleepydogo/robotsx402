@@ -43,12 +43,19 @@ class RobotExecutor:
         )
 
         try:
+            # Prepare headers
+            headers = {"Content-Type": "application/json"}
+
+            # Add API key if robot has one configured
+            if robot.control_api_key:
+                headers["X-API-Key"] = robot.control_api_key
+
             # Call robot endpoint
             async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.post(
                     robot.endpoint,
                     json=payload,
-                    headers={"Content-Type": "application/json"}
+                    headers=headers
                 )
 
                 response.raise_for_status()

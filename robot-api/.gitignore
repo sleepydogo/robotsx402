@@ -25,9 +25,13 @@ wheels/
 
 # Virtual environments
 venv/
+venv
+.venv
 ENV/
 env/
-.venv
+venv-sudo
+venv-sudo/
+.venv-sudo
 
 # IDE
 .vscode/

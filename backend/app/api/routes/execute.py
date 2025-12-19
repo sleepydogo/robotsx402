@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Header, Response
+from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
 from uuid import UUID
@@ -15,9 +16,9 @@ from sqlalchemy import select
 router = APIRouter(prefix="/execute", tags=["Execution"])
 
 
-@router.post("/{robot_id}", response_model=ExecuteResponse)
+@router.post("/{robot_id}", response_model=None)
 async def execute_robot(
-    robot_id: UUID,
+    robot_id: str,
     payload: ExecutePayload,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
@@ -50,22 +51,32 @@ async def execute_robot(
             if str(session.robot_id) != str(robot_id):
                 raise HTTPException(status_code=400, detail="Session does not match robot")
 
-            # Execute the robot
-            result = await robot_executor.execute(
-                robot_id=robot_id,
-                user_id=current_user.id,
-                session_id=UUID(session.id),
-                payload=payload.model_dump(),
-                db=db
-            )
+            # Execute the robot (convert IDs to UUID for executor)
+            try:
+                result = await robot_executor.execute(
+                    robot_id=UUID(robot_id),
+                    user_id=UUID(str(current_user.id)),
+                    session_id=UUID(session.id),
+                    payload=payload.model_dump(),
+                    db=db
+                )
+            except ValueError as e:
+                raise HTTPException(status_code=400, detail=f"Invalid ID format: {str(e)}")
 
             return result
+
+    # Calculate amount based on rental plan or base price
+    amount = float(robot.price)
+    if payload.rental_plan_index is not None and robot.rental_plans:
+        if 0 <= payload.rental_plan_index < len(robot.rental_plans):
+            selected_plan = robot.rental_plans[payload.rental_plan_index]
+            amount = float(selected_plan.get('price', robot.price))
 
     # No valid paid session - create new session and return 402
     new_session = await session_manager.create_session(
         user_id=str(current_user.id),
         robot_id=str(robot_id),
-        amount=float(robot.price),
+        amount=amount,
         recipient_address=robot.wallet_address,
         service_payload=payload.model_dump()
     )
@@ -74,7 +85,7 @@ async def execute_robot(
     return generate_x402_response(
         robot_id=str(robot_id),
         robot_name=robot.name,
-        amount=float(robot.price),
+        amount=amount,
         recipient_address=robot.wallet_address,
         service=payload.service,
         session_id=new_session.id

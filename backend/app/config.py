@@ -26,6 +26,9 @@ class Settings(BaseSettings):
     API_V1_PREFIX: str = "/api"
     PROJECT_NAME: str = "x402 Payment Platform"
 
+    # AI Integration
+    ANTHROPIC_API_KEY: str
+
     class Config:
         env_file = ".env"
         case_sensitive = True

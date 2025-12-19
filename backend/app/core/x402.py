@@ -9,7 +9,7 @@ import uuid
 class X402PaymentData(BaseModel):
     session_id: str
     amount: float
-    currency: str = "USDC"
+    currency: str = "rUSD"
     network: str
     recipient: str
     service: str
@@ -51,7 +51,7 @@ def generate_x402_response(
     payment_data = X402PaymentData(
         session_id=session_id,
         amount=amount,
-        currency="USDC",
+        currency="rUSD",
         network=f"solana-{settings.SOLANA_NETWORK}",
         recipient=recipient_address,
         service=service,
@@ -99,7 +99,7 @@ def parse_x402_headers(headers: Dict[str, str]) -> Optional[X402PaymentData]:
         return X402PaymentData(
             session_id=headers.get("X-Session-ID", ""),
             amount=float(headers.get("X-Payment-Amount", "0")),
-            currency=headers.get("X-Payment-Currency", "USDC"),
+            currency=headers.get("X-Payment-Currency", "rUSD"),
             network=headers.get("X-Payment-Network", ""),
             recipient=headers.get("X-Payment-Address", ""),
             service="",  # Not in headers, get from body
