@@ -15,7 +15,7 @@ services:
     networks:
       - robotsx402-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U robotsx402"]
+      test: ["CMD-SHELL", "pg_isready -U robotsx402 -d x402_platform"]
       interval: 10s
       timeout: 5s
       retries: 5
