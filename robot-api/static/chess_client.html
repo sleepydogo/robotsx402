@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Robot - Interactive Chess Board</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .main-container {
+            max-width: 1400px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .side-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .chess-container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .chessboard-wrapper {
+            position: relative;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .coordinates {
+            display: flex;
+            justify-content: space-around;
+            padding: 5px 30px;
+            color: #7f8c8d;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .coordinates.vertical {
+            position: absolute;
+            left: 0;
+            top: 30px;
+            flex-direction: column;
+            height: 600px;
+            padding: 0;
+            justify-content: space-around;
+            width: 25px;
+        }
+
+        .chessboard {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 0;
+            background: #312e2b;
+            border: 3px solid #312e2b;
+            border-radius: 8px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            width: 600px;
+            height: 600px;
+            margin: 0 auto;
+        }
+
+        .square {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .square.light {
+            background: #f0d9b5;
+        }
+
+        .square.dark {
+            background: #b58863;
+        }
+
+        .square:hover {
+            filter: brightness(0.9);
+        }
+
+        .square.selected {
+            box-shadow: inset 0 0 0 4px #3498db;
+            position: relative;
+        }
+
+        .square.valid-move::after {
+            content: '';
+            position: absolute;
+            width: 30%;
+            height: 30%;
+            background: rgba(52, 152, 219, 0.5);
+            border-radius: 50%;
+        }
+
+        .square.valid-capture::after {
+            content: '';
+            position: absolute;
+            width: 90%;
+            height: 90%;
+            border: 4px solid rgba(231, 76, 60, 0.7);
+            border-radius: 50%;
+        }
+
+        .piece {
+            font-size: 52px;
+            line-height: 1;
+            pointer-events: none;
+        }
+
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.secondary {
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+        }
+
+        button.danger {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        }
+
+        .status {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            text-align: center;
+            display: none;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+            display: block;
+        }
+
+        .info-box {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .info-box strong {
+            display: block;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .info-box span {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .video-container {
+            width: 100%;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            aspect-ratio: 4/3;
+            margin-top: 15px;
+        }
+
+        #videoStream {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .turn-indicator {
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .turn-indicator.white-turn {
+            background: linear-gradient(135deg, #ecf0f1 0%, #bdc3c7 100%);
+            color: #2c3e50;
+        }
+
+        .turn-indicator.black-turn {
+            background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+            color: white;
+        }
+
+        .move-history {
+            max-height: 300px;
+            overflow-y: auto;
+            background: #ecf0f1;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 15px;
+        }
+
+        .move-entry {
+            padding: 8px;
+            margin-bottom: 5px;
+            background: white;
+            border-radius: 4px;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        @media (max-width: 1200px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+
+            .side-panel {
+                order: 2;
+            }
+
+            .chess-container {
+                order: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-container">
+        <!-- Left Panel: Controls -->
+        <div class="side-panel">
+            <h2>⚙️ Control Panel</h2>
+
+            <div class="form-group">
+                <label>API Key</label>
+                <input type="password" id="apiKey" placeholder="Enter your API key" value="as129skaSF1">
+            </div>
+
+            <div class="info-box">
+                <strong>Current Turn:</strong>
+                <span id="currentTurn">White</span>
+            </div>
+
+            <div class="info-box">
+                <strong>Selected Piece:</strong>
+                <span id="selectedPiece">None</span>
+            </div>
+
+            <div class="controls">
+                <button onclick="executeMoveOnRobot()">🤖 Execute on Robot</button>
+                <button class="secondary" onclick="resetBoard()">🔄 Reset Board</button>
+                <button class="danger" onclick="undoLastMove()">⬅️ Undo Move</button>
+            </div>
+
+            <div id="controlStatus" class="status"></div>
+
+            <div class="move-history">
+                <strong style="display: block; margin-bottom: 10px; color: #2c3e50;">Move History</strong>
+                <div id="moveHistory"></div>
+            </div>
+        </div>
+
+        <!-- Center: Chess Board -->
+        <div class="chess-container">
+            <h1>♟️ Interactive Chess Board</h1>
+
+            <div class="turn-indicator white-turn" id="turnIndicator">
+                White's Turn
+            </div>
+
+            <div class="chessboard-wrapper">
+                <div class="coordinates vertical">
+                    <div>8</div>
+                    <div>7</div>
+                    <div>6</div>
+                    <div>5</div>
+                    <div>4</div>
+                    <div>3</div>
+                    <div>2</div>
+                    <div>1</div>
+                </div>
+                <div id="chessboard" class="chessboard"></div>
+                <div class="coordinates">
+                    <div>a</div>
+                    <div>b</div>
+                    <div>c</div>
+                    <div>d</div>
+                    <div>e</div>
+                    <div>f</div>
+                    <div>g</div>
+                    <div>h</div>
+                </div>
+            </div>
+
+            <div id="moveStatus" class="status"></div>
+        </div>
+
+        <!-- Right Panel: Video Stream -->
+        <div class="side-panel">
+            <h2>📹 Robot Camera</h2>
+            <div class="video-container">
+                <img id="videoStream" alt="Robot camera feed will appear here" />
+            </div>
+            <div id="streamStatus" class="status"></div>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration
+        const API_BASE_URL = window.location.protocol === 'file:'
+            ? 'http://localhost:8001'
+            : window.location.origin;
+
+        // Chess pieces using Unicode symbols
+        const PIECES = {
+            'wK': '♔', 'wQ': '♕', 'wR': '♖', 'wB': '♗', 'wN': '♘', 'wP': '♙',
+            'bK': '♚', 'bQ': '♛', 'bR': '♜', 'bB': '♝', 'bN': '♞', 'bP': '♟'
+        };
+
+        // Initial chess board setup (standard chess starting position)
+        let board = [
+            ['bR', 'bN', 'bB', 'bQ', 'bK', 'bB', 'bN', 'bR'],  // Row 0 (8th rank)
+            ['bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP'],  // Row 1 (7th rank)
+            ['', '', '', '', '', '', '', ''],                    // Row 2 (6th rank)
+            ['', '', '', '', '', '', '', ''],                    // Row 3 (5th rank)
+            ['', '', '', '', '', '', '', ''],                    // Row 4 (4th rank)
+            ['', '', '', '', '', '', '', ''],                    // Row 5 (3rd rank)
+            ['wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP'],  // Row 6 (2nd rank)
+            ['wR', 'wN', 'wB', 'wQ', 'wK', 'wB', 'wN', 'wR']   // Row 7 (1st rank)
+        ];
+
+        let currentTurn = 'w';  // 'w' for white, 'b' for black
+        let selectedSquare = null;
+        let validMoves = [];
+        let moveHistory = [];
+        let lastMove = null;
+
+        // Initialize the chess board
+        function initChessBoard() {
+            const boardElement = document.getElementById('chessboard');
+            boardElement.innerHTML = '';
+
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    const square = document.createElement('div');
+                    square.className = `square ${(row + col) % 2 === 0 ? 'light' : 'dark'}`;
+                    square.dataset.row = row;
+                    square.dataset.col = col;
+                    square.onclick = () => handleSquareClick(row, col);
+
+                    const piece = board[row][col];
+                    if (piece) {
+                        const pieceElement = document.createElement('div');
+                        pieceElement.className = 'piece';
+                        pieceElement.textContent = PIECES[piece];
+                        square.appendChild(pieceElement);
+                    }
+
+                    boardElement.appendChild(square);
+                }
+            }
+
+            updateTurnIndicator();
+        }
+
+        // Handle square click
+        function handleSquareClick(row, col) {
+            const piece = board[row][col];
+
+            // If no piece is selected
+            if (selectedSquare === null) {
+                // Only select if there's a piece and it's the current player's turn
+                if (piece && piece[0] === currentTurn) {
+                    selectedSquare = { row, col };
+                    validMoves = getValidMoves(row, col);
+                    highlightSquares();
+                    updateSelectedPieceInfo(piece, row, col);
+                }
+            } else {
+                // If clicking the same square, deselect
+                if (selectedSquare.row === row && selectedSquare.col === col) {
+                    clearSelection();
+                }
+                // If clicking a valid move
+                else if (isValidMove(row, col)) {
+                    makeMove(selectedSquare.row, selectedSquare.col, row, col);
+                }
+                // If clicking another piece of the same color, switch selection
+                else if (piece && piece[0] === currentTurn) {
+                    selectedSquare = { row, col };
+                    validMoves = getValidMoves(row, col);
+                    highlightSquares();
+                    updateSelectedPieceInfo(piece, row, col);
+                }
+                // Invalid move, clear selection
+                else {
+                    clearSelection();
+                }
+            }
+        }
+
+        // Get valid moves for a piece (simplified chess rules)
+        function getValidMoves(row, col) {
+            const piece = board[row][col];
+            if (!piece) return [];
+
+            const moves = [];
+            const pieceType = piece[1];
+            const color = piece[0];
+
+            switch (pieceType) {
+                case 'P': // Pawn
+                    const direction = color === 'w' ? -1 : 1;
+                    const startRow = color === 'w' ? 6 : 1;
+
+                    // Move forward
+                    if (isInBounds(row + direction, col) && !board[row + direction][col]) {
+                        moves.push({ row: row + direction, col });
+
+                        // Double move from start
+                        if (row === startRow && !board[row + 2 * direction][col]) {
+                            moves.push({ row: row + 2 * direction, col });
+                        }
+                    }
+
+                    // Capture diagonally
+                    for (let dc of [-1, 1]) {
+                        const newRow = row + direction;
+                        const newCol = col + dc;
+                        if (isInBounds(newRow, newCol) && board[newRow][newCol] && board[newRow][newCol][0] !== color) {
+                            moves.push({ row: newRow, col: newCol });
+                        }
+                    }
+                    break;
+
+                case 'R': // Rook
+                    addLineMoves(row, col, color, moves, [[-1, 0], [1, 0], [0, -1], [0, 1]]);
+                    break;
+
+                case 'N': // Knight
+                    const knightMoves = [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]];
+                    for (let [dr, dc] of knightMoves) {
+                        const newRow = row + dr;
+                        const newCol = col + dc;
+                        if (isInBounds(newRow, newCol) && (!board[newRow][newCol] || board[newRow][newCol][0] !== color)) {
+                            moves.push({ row: newRow, col: newCol });
+                        }
+                    }
+                    break;
+
+                case 'B': // Bishop
+                    addLineMoves(row, col, color, moves, [[-1, -1], [-1, 1], [1, -1], [1, 1]]);
+                    break;
+
+                case 'Q': // Queen
+                    addLineMoves(row, col, color, moves, [[-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [-1, 1], [1, -1], [1, 1]]);
+                    break;
+
+                case 'K': // King
+                    for (let dr = -1; dr <= 1; dr++) {
+                        for (let dc = -1; dc <= 1; dc++) {
+                            if (dr === 0 && dc === 0) continue;
+                            const newRow = row + dr;
+                            const newCol = col + dc;
+                            if (isInBounds(newRow, newCol) && (!board[newRow][newCol] || board[newRow][newCol][0] !== color)) {
+                                moves.push({ row: newRow, col: newCol });
+                            }
+                        }
+                    }
+                    break;
+            }
+
+            return moves;
+        }
+
+        // Helper function to add line moves (for rook, bishop, queen)
+        function addLineMoves(row, col, color, moves, directions) {
+            for (let [dr, dc] of directions) {
+                let newRow = row + dr;
+                let newCol = col + dc;
+
+                while (isInBounds(newRow, newCol)) {
+                    if (!board[newRow][newCol]) {
+                        moves.push({ row: newRow, col: newCol });
+                    } else {
+                        if (board[newRow][newCol][0] !== color) {
+                            moves.push({ row: newRow, col: newCol });
+                        }
+                        break;
+                    }
+                    newRow += dr;
+                    newCol += dc;
+                }
+            }
+        }
+
+        // Check if position is within board bounds
+        function isInBounds(row, col) {
+            return row >= 0 && row < 8 && col >= 0 && col < 8;
+        }
+
+        // Check if a move is valid
+        function isValidMove(row, col) {
+            return validMoves.some(move => move.row === row && move.col === col);
+        }
+
+        // Make a move
+        function makeMove(fromRow, fromCol, toRow, toCol) {
+            const piece = board[fromRow][fromCol];
+            const capturedPiece = board[toRow][toCol];
+
+            // Save move for history and undo
+            lastMove = {
+                from: { row: fromRow, col: fromCol },
+                to: { row: toRow, col: toCol },
+                piece: piece,
+                captured: capturedPiece,
+                turn: currentTurn
+            };
+
+            // Execute move
+            board[toRow][toCol] = piece;
+            board[fromRow][fromCol] = '';
+
+            // Add to move history
+            addMoveToHistory(fromRow, fromCol, toRow, toCol, piece, capturedPiece);
+
+            // Switch turn
+            currentTurn = currentTurn === 'w' ? 'b' : 'w';
+
+            // Clear selection and redraw
+            clearSelection();
+            initChessBoard();
+
+            showStatus('moveStatus', `Move: ${getPieceName(piece)} ${getSquareName(fromRow, fromCol)} → ${getSquareName(toRow, toCol)}`, 'success');
+        }
+
+        // Highlight valid moves
+        function highlightSquares() {
+            // Clear previous highlights
+            document.querySelectorAll('.square').forEach(sq => {
+                sq.classList.remove('selected', 'valid-move', 'valid-capture');
+            });
+
+            if (selectedSquare) {
+                // Highlight selected square
+                const selectedElement = document.querySelector(`[data-row="${selectedSquare.row}"][data-col="${selectedSquare.col}"]`);
+                selectedElement.classList.add('selected');
+
+                // Highlight valid moves
+                validMoves.forEach(move => {
+                    const element = document.querySelector(`[data-row="${move.row}"][data-col="${move.col}"]`);
+                    if (board[move.row][move.col]) {
+                        element.classList.add('valid-capture');
+                    } else {
+                        element.classList.add('valid-move');
+                    }
+                });
+            }
+        }
+
+        // Clear selection
+        function clearSelection() {
+            selectedSquare = null;
+            validMoves = [];
+            highlightSquares();
+            document.getElementById('selectedPiece').textContent = 'None';
+        }
+
+        // Update turn indicator
+        function updateTurnIndicator() {
+            const indicator = document.getElementById('turnIndicator');
+            const turnText = document.getElementById('currentTurn');
+
+            if (currentTurn === 'w') {
+                indicator.className = 'turn-indicator white-turn';
+                indicator.textContent = "White's Turn";
+                turnText.textContent = 'White';
+            } else {
+                indicator.className = 'turn-indicator black-turn';
+                indicator.textContent = "Black's Turn";
+                turnText.textContent = 'Black';
+            }
+        }
+
+        // Update selected piece info
+        function updateSelectedPieceInfo(piece, row, col) {
+            const info = `${getPieceName(piece)} at ${getSquareName(row, col)}`;
+            document.getElementById('selectedPiece').textContent = info;
+        }
+
+        // Get piece name
+        function getPieceName(piece) {
+            const names = { 'K': 'King', 'Q': 'Queen', 'R': 'Rook', 'B': 'Bishop', 'N': 'Knight', 'P': 'Pawn' };
+            const color = piece[0] === 'w' ? 'White' : 'Black';
+            return `${color} ${names[piece[1]]}`;
+        }
+
+        // Get square name in chess notation
+        function getSquareName(row, col) {
+            const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+            const ranks = ['8', '7', '6', '5', '4', '3', '2', '1'];
+            return files[col] + ranks[row];
+        }
+
+        // Add move to history
+        function addMoveToHistory(fromRow, fromCol, toRow, toCol, piece, captured) {
+            const moveText = `${getPieceName(piece)}: ${getSquareName(fromRow, fromCol)} → ${getSquareName(toRow, toCol)}${captured ? ' (capture)' : ''}`;
+            const historyElement = document.getElementById('moveHistory');
+
+            const entry = document.createElement('div');
+            entry.className = 'move-entry';
+            entry.innerHTML = `
+                <span>${moveHistory.length + 1}. ${moveText}</span>
+                <span style="color: #95a5a6;">${new Date().toLocaleTimeString()}</span>
+            `;
+
+            historyElement.insertBefore(entry, historyElement.firstChild);
+            moveHistory.push({ fromRow, fromCol, toRow, toCol, piece, captured });
+        }
+
+        // Reset board
+        function resetBoard() {
+            if (confirm('Are you sure you want to reset the board?')) {
+                board = [
+                    ['bR', 'bN', 'bB', 'bQ', 'bK', 'bB', 'bN', 'bR'],
+                    ['bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP'],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['', '', '', '', '', '', '', ''],
+                    ['wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP'],
+                    ['wR', 'wN', 'wB', 'wQ', 'wK', 'wB', 'wN', 'wR']
+                ];
+                currentTurn = 'w';
+                clearSelection();
+                initChessBoard();
+                document.getElementById('moveHistory').innerHTML = '';
+                moveHistory = [];
+                lastMove = null;
+                showStatus('controlStatus', 'Board reset successfully', 'success');
+            }
+        }
+
+        // Undo last move
+        function undoLastMove() {
+            if (!lastMove) {
+                showStatus('controlStatus', 'No move to undo', 'error');
+                return;
+            }
+
+            // Restore the move
+            board[lastMove.from.row][lastMove.from.col] = lastMove.piece;
+            board[lastMove.to.row][lastMove.to.col] = lastMove.captured || '';
+
+            // Restore turn
+            currentTurn = lastMove.turn;
+
+            // Remove from history
+            moveHistory.pop();
+            const historyElement = document.getElementById('moveHistory');
+            if (historyElement.firstChild) {
+                historyElement.removeChild(historyElement.firstChild);
+            }
+
+            lastMove = null;
+            clearSelection();
+            initChessBoard();
+
+            showStatus('controlStatus', 'Move undone', 'success');
+        }
+
+        // Execute move on robot
+        async function executeMoveOnRobot() {
+            if (!lastMove) {
+                showStatus('controlStatus', 'No move to execute. Make a move first!', 'error');
+                return;
+            }
+
+            const apiKey = document.getElementById('apiKey').value;
+            if (!apiKey) {
+                showStatus('controlStatus', 'Please enter your API key', 'error');
+                return;
+            }
+
+            showStatus('controlStatus', 'Executing move on robot...', 'info');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/robot/move`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-API-Key': apiKey
+                    },
+                    body: JSON.stringify({
+                        from: {
+                            x: lastMove.from.row,
+                            y: lastMove.from.col
+                        },
+                        to: {
+                            x: lastMove.to.row,
+                            y: lastMove.to.col
+                        },
+                        action: lastMove.captured ? 'capture' : 'move'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showStatus('controlStatus', '✅ Robot executed move successfully!', 'success');
+                } else {
+                    showStatus('controlStatus', `❌ Robot error: ${data.detail || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                showStatus('controlStatus', `❌ Connection failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Stream control variables
+        let streamController = null;
+        let isStreamConnected = false;
+        let snapshotInterval = null;
+        let isMobileDevice = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+        // Start video stream (compatible with mobile devices)
+        function startStream() {
+            const apiKey = document.getElementById('apiKey').value;
+            const img = document.getElementById('videoStream');
+
+            if (!apiKey) {
+                showStatus('streamStatus', 'Please enter your API key', 'error');
+                return;
+            }
+
+            // Show initial loading status
+            showStatus('streamStatus', 'Connecting to stream...', 'info');
+
+            // Use different method for mobile vs desktop
+            if (isMobileDevice) {
+                console.log('Mobile device detected, using snapshot polling');
+                startSnapshotPolling(img, apiKey);
+            } else {
+                console.log('Desktop device detected, using MJPEG stream');
+                const streamUrl = `${API_BASE_URL}/api/robot/stream`;
+                startUniversalStream(img, streamUrl, apiKey);
+            }
+        }
+
+        // Universal streaming method that works on desktop and mobile
+        async function startUniversalStream(img, streamUrl, apiKey) {
+            // Cancel previous stream if exists
+            if (streamController) {
+                streamController.abort();
+            }
+
+            streamController = new AbortController();
+            isStreamConnected = false;
+
+            try {
+                const response = await fetch(streamUrl, {
+                    method: 'GET',
+                    headers: {
+                        'X-API-Key': apiKey
+                    },
+                    signal: streamController.signal
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                // Check if ReadableStream is supported
+                if (!response.body || !response.body.getReader) {
+                    throw new Error('ReadableStream not supported. Please update your browser.');
+                }
+
+                const reader = response.body.getReader();
+                let buffer = new Uint8Array();
+                let frameCount = 0;
+                let firstFrameReceived = false;
+
+                console.log('Stream reader started');
+
+                while (true) {
+                    const { done, value } = await reader.read();
+
+                    if (done) {
+                        console.log('Stream ended normally');
+                        break;
+                    }
+
+                    if (!value || value.length === 0) {
+                        continue;
+                    }
+
+                    // Append new data to buffer
+                    const newBuffer = new Uint8Array(buffer.length + value.length);
+                    newBuffer.set(buffer);
+                    newBuffer.set(value, buffer.length);
+                    buffer = newBuffer;
+
+                    // Look for complete JPEG frames
+                    // JPEG starts with 0xFF 0xD8 and ends with 0xFF 0xD9
+                    let startIdx = -1;
+                    let endIdx = -1;
+
+                    for (let i = 0; i < buffer.length - 1; i++) {
+                        if (buffer[i] === 0xFF && buffer[i + 1] === 0xD8 && startIdx === -1) {
+                            startIdx = i;
+                        }
+                        if (buffer[i] === 0xFF && buffer[i + 1] === 0xD9 && startIdx !== -1) {
+                            endIdx = i + 2;
+                            break;
+                        }
+                    }
+
+                    // If we found a complete JPEG frame
+                    if (startIdx !== -1 && endIdx !== -1) {
+                        const jpegData = buffer.slice(startIdx, endIdx);
+
+                        try {
+                            const blob = new Blob([jpegData], { type: 'image/jpeg' });
+                            const url = URL.createObjectURL(blob);
+
+                            // Update image
+                            const oldUrl = img.src;
+                            img.src = url;
+
+                            // Show success message only for the first frame
+                            if (!firstFrameReceived) {
+                                firstFrameReceived = true;
+                                isStreamConnected = true;
+                                showStatus('streamStatus', '✅ Stream connected', 'success');
+                                console.log('First frame received successfully');
+                            }
+
+                            // Clean up old blob URL to prevent memory leaks
+                            if (oldUrl && oldUrl.startsWith('blob:')) {
+                                setTimeout(() => {
+                                    try {
+                                        URL.revokeObjectURL(oldUrl);
+                                    } catch (e) {
+                                        // Ignore cleanup errors
+                                    }
+                                }, 200);
+                            }
+
+                            frameCount++;
+
+                            // Log progress every 60 frames (approximately every 2 seconds at 30fps)
+                            if (frameCount % 60 === 0) {
+                                console.log(`Stream healthy: ${frameCount} frames received`);
+                            }
+
+                        } catch (blobError) {
+                            console.error('Error creating blob:', blobError);
+                        }
+
+                        // Remove processed data from buffer
+                        buffer = buffer.slice(endIdx);
+                    }
+
+                    // Prevent buffer from growing too large (memory protection)
+                    if (buffer.length > 3 * 1024 * 1024) { // 3MB limit
+                        console.warn('Buffer overflow, resetting');
+                        buffer = new Uint8Array();
+                    }
+                }
+
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    console.log('Stream aborted by user');
+                    if (isStreamConnected) {
+                        showStatus('streamStatus', 'Stream stopped', 'info');
+                    }
+                } else {
+                    console.error('Stream error:', error);
+                    showStatus('streamStatus', `❌ Error: ${error.message}`, 'error');
+
+                    // Auto-retry connection after 3 seconds if it was previously connected
+                    if (isStreamConnected) {
+                        setTimeout(() => {
+                            const apiKey = document.getElementById('apiKey').value;
+                            if (apiKey) {
+                                console.log('Attempting to reconnect...');
+                                startStream();
+                            }
+                        }, 3000);
+                    }
+                }
+            }
+        }
+
+        // Snapshot polling method for mobile devices
+        function startSnapshotPolling(img, apiKey) {
+            // Clear any existing interval
+            if (snapshotInterval) {
+                clearInterval(snapshotInterval);
+            }
+
+            const snapshotUrl = `${API_BASE_URL}/api/robot/snapshot`;
+            let frameCount = 0;
+            let errorCount = 0;
+            const maxErrors = 5;
+
+            // Function to fetch a single snapshot
+            async function fetchSnapshot() {
+                try {
+                    const response = await fetch(snapshotUrl, {
+                        method: 'GET',
+                        headers: {
+                            'X-API-Key': apiKey
+                        },
+                        cache: 'no-store' // Prevent caching to get fresh frames
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+
+                    const blob = await response.blob();
+                    const url = URL.createObjectURL(blob);
+
+                    // Update image
+                    const oldUrl = img.src;
+                    img.src = url;
+
+                    // Clean up old blob URL
+                    if (oldUrl && oldUrl.startsWith('blob:')) {
+                        setTimeout(() => URL.revokeObjectURL(oldUrl), 100);
+                    }
+
+                    // Success feedback
+                    if (frameCount === 0) {
+                        isStreamConnected = true;
+                        showStatus('streamStatus', '✅ Stream connected (mobile mode)', 'success');
+                        console.log('Snapshot polling started successfully');
+                    }
+
+                    frameCount++;
+                    errorCount = 0; // Reset error count on success
+
+                    if (frameCount % 30 === 0) {
+                        console.log(`Snapshot polling healthy: ${frameCount} frames`);
+                    }
+
+                } catch (error) {
+                    errorCount++;
+                    console.error(`Snapshot error (${errorCount}/${maxErrors}):`, error);
+
+                    if (errorCount >= maxErrors) {
+                        clearInterval(snapshotInterval);
+                        snapshotInterval = null;
+                        isStreamConnected = false;
+                        showStatus('streamStatus', `❌ Connection failed: ${error.message}`, 'error');
+                    }
+                }
+            }
+
+            // Start polling at 10 FPS (100ms interval) for smooth mobile experience
+            fetchSnapshot(); // Fetch first frame immediately
+            snapshotInterval = setInterval(fetchSnapshot, 100);
+        }
+
+        // Stop snapshot polling
+        function stopSnapshotPolling() {
+            if (snapshotInterval) {
+                clearInterval(snapshotInterval);
+                snapshotInterval = null;
+                console.log('Snapshot polling stopped');
+            }
+        }
+
+        // Pause/resume stream when page visibility changes (battery optimization)
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                console.log('Page hidden, pausing stream');
+
+                // Stop MJPEG stream if active
+                if (streamController && isStreamConnected) {
+                    streamController.abort();
+                    streamController = null;
+                }
+
+                // Stop snapshot polling if active
+                stopSnapshotPolling();
+
+                isStreamConnected = false;
+            } else {
+                // Resume stream when page becomes visible
+                console.log('Page visible, resuming stream');
+                const apiKey = document.getElementById('apiKey').value;
+                if (apiKey) {
+                    setTimeout(startStream, 300);
+                }
+            }
+        });
+
+        // Show status message
+        function showStatus(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = `status ${type}`;
+
+            if (type === 'success') {
+                setTimeout(() => {
+                    element.className = 'status';
+                }, 3000);
+            }
+        }
+
+        // Initialize on page load
+        window.onload = () => {
+            initChessBoard();
+
+            const apiKey = document.getElementById('apiKey').value;
+            if (apiKey) {
+                setTimeout(startStream, 500);
+            }
+        };
+
+        document.getElementById('apiKey').addEventListener('change', startStream);
+    </script>
+</body>
+
+</html>

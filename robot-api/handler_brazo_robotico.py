@@ -107,11 +107,11 @@ class RoboticArm:
         # Posiciona en x,y a 120 de altura
         command = self.create_comand(posx_ini, posy_ini, 120)
         self.SERIAL_DEV.write(command)
-        time.sleep(2)
-        self.SERIAL_DEV.write('G1 Z60 \r\n'.encode('ascii'))
+        time.sleep(2) 
+        self.SERIAL_DEV.write('G1 Z50 \r\n'.encode('ascii'))
         self.cerrarPinza()
-        if 2 >= posx_ini:
-            self.SERIAL_DEV.write('G1 Z70 \r\n'.encode('ascii'))
+        if 2 >= posx_ini: 
+            self.SERIAL_DEV.write('G1 Z80 \r\n'.encode('ascii'))
         else:
             self.SERIAL_DEV.write('G1 Z140 \r\n'.encode('ascii'))
         time.sleep(2)
@@ -123,7 +123,7 @@ class RoboticArm:
         command = self.create_comand(posx_fin, posy_fin, 130)
         self.SERIAL_DEV.write(command)
         time.sleep(2)
-        self.SERIAL_DEV.write('G1 Z70 \r\n'.encode('ascii'))
+        self.SERIAL_DEV.write('G1 Z68 \r\n'.encode('ascii'))
         self.abrirPinza()
         if 2 >= posx_fin:
             self.SERIAL_DEV.write('G1 Z65 \r\n'.encode('ascii'))

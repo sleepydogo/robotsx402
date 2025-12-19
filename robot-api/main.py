@@ -182,6 +182,11 @@ async def video_stream():
 
     Requires X-API-Key header for authentication
     Can be displayed directly in HTML: <img src="/api/robot/stream" />
+
+    Optimized for Cloudflare proxy with:
+    - Frame caching for multiple clients
+    - Rate limiting to control bandwidth
+    - Keep-alive heartbeat to prevent timeout
     """
     if video_camera is None:
         raise HTTPException(status_code=503, detail="Camera not available")
@@ -194,6 +199,45 @@ async def video_stream():
     except Exception as e:
         logger.error(f"Error streaming video: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to stream video: {str(e)}")
+
+
+@app.get("/api/robot/stream/stats", dependencies=[Depends(verify_api_key)])
+async def stream_stats():
+    """
+    Get streaming statistics
+
+    Returns information about active clients and streaming configuration
+    Useful for monitoring and debugging
+    """
+    if video_camera is None:
+        raise HTTPException(status_code=503, detail="Camera not available")
+
+    return video_camera.get_stats()
+
+
+@app.get("/api/robot/snapshot", dependencies=[Depends(verify_api_key)])
+async def snapshot():
+    """
+    Get a single frame snapshot from the camera
+
+    This endpoint is optimized for mobile devices that may have issues
+    with MJPEG streaming. Mobile clients can poll this endpoint to get
+    individual frames instead of using the streaming endpoint.
+
+    Requires X-API-Key header for authentication
+    Returns a JPEG image
+    """
+    from fastapi.responses import Response
+
+    if video_camera is None:
+        raise HTTPException(status_code=503, detail="Camera not available")
+
+    try:
+        frame = video_camera.get_frame()
+        return Response(content=frame, media_type="image/jpeg")
+    except Exception as e:
+        logger.error(f"Error capturing snapshot: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to capture snapshot: {str(e)}")
 
 
 if __name__ == "__main__":

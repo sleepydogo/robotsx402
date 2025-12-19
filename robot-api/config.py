@@ -32,6 +32,13 @@ class Settings(BaseSettings):
     CAMERA_FPS: int = 30
     JPEG_QUALITY: int = 80  # JPEG compression quality (0-100)
 
+    # Streaming Configuration (Cloudflare optimized)
+    STREAM_FPS: int = 15  # Limit stream FPS to reduce bandwidth (lower than camera FPS)
+    STREAM_BUFFER_SIZE: int = 2  # Number of frames to buffer per client
+    STREAM_TIMEOUT: int = 30  # Seconds before considering a stream dead
+    ENABLE_FRAME_CACHE: bool = True  # Share frames between multiple clients
+    HEARTBEAT_INTERVAL: float = 5.0  # Send keep-alive every N seconds
+
     # Robotic Arm Configuration
     CSV_MATRIX_PATH: str = "/home/robinson/robotsx402/robot-api/rutinas-movimiento.csv"
     SERIAL_BAUDRATE: int = 9600
