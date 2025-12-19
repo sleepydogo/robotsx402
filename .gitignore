@@ -53,6 +53,7 @@ coverage/
 *.json
 !tsconfig.json
 !package.json
+!package-lock.json
 !Anchor.toml
 
 # Cargo
