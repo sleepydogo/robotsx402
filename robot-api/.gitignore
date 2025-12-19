@@ -1,6 +1,6 @@
 # Environment variables
 .env
-
+venv-sudo
 # Python
 __pycache__/
 *.py[cod]
