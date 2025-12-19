@@ -16,6 +16,7 @@ DOMAINS=(
     "robotsx402.fun"
     "www.robotsx402.fun"
     "api.robotsx402.fun"
+    "faucet.robotsx402.fun"
 )
 
 # Email for Let's Encrypt notifications
