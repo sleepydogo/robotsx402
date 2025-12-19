@@ -1,7 +1,9 @@
-export default function RobotDetailPage({ params }: { params: { id: string } }) {
+export default async function RobotDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+
   return (
     <div>
-      <h1>Robot Detail: {params.id}</h1>
+      <h1>Robot Detail: {id}</h1>
     </div>
   );
 }

@@ -14,6 +14,13 @@ export interface Robot {
   owner_id: string;
   services: string[];
   total_revenue?: number;
+  rental_plans?: Array<{
+    id: string;
+    name: string;
+    duration_minutes: number;
+    price: number;
+    discount_percentage?: number;
+  }>;
 }
 
 interface RobotCreateData {

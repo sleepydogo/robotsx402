@@ -34,12 +34,12 @@ const fadeInUpVariants = {
 };
 
 // --- Componente de Botón con Efecto "Spotlight" ---
-function SpotlightButton({ children, className = "", onClick }) {
-  const ref = useRef(null);
+function SpotlightButton({ children, className = "", onClick }: { children: React.ReactNode; className?: string; onClick?: () => void }) {
+  const ref = useRef<HTMLButtonElement>(null);
   const x = useMotionValue(0);
   const y = useMotionValue(0);
 
-  const handleMouseMove = (e) => {
+  const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (!ref.current) return;
     const rect = ref.current.getBoundingClientRect();
     x.set(e.clientX - rect.left);

@@ -137,7 +137,7 @@ export default function CreateRobot({ onCreated }: { onCreated?: () => void }) {
 
     try {
       // Call backend endpoint to explore API and generate interface
-      const response = await apiClient.post('/robots/explore-api', {
+      const response = await apiClient.post<{ interface_config: any }>('/robots/explore-api', {
         api_url: formData.control_api_url,
         robot_name: formData.name || 'Unknown Robot',
         has_video: !!formData.video_stream_url,

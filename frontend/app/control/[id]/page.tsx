@@ -59,7 +59,7 @@ export default function RobotControlPage() {
   const loadRobot = async () => {
     try {
       setLoading(true)
-      const response = await apiClient.get(`/robots/${params.id}`)
+      const response = await apiClient.get<Robot>(`/robots/${params.id}`)
       setRobot(response.data)
 
       // Check if robot API is accessible
