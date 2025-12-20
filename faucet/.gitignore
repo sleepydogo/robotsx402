@@ -1,0 +1,9 @@
+DEPLOYMENT.MD
+export-wallet.sh
+
+# Solana engine
+solana-engine/node_modules/
+solana-engine/target/*
+!solana-engine/target/types/
+!solana-engine/target/idl/
+solana-engine/.anchor/

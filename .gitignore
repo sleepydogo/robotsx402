@@ -8,8 +8,9 @@ test-ledger/
 
 # Documentation (moved to .docs/)
 .docs/
+*.sh
 *.md
-!CLAUDE.md
+.claude/
 !README.md
 
 # Node

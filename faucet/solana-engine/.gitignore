@@ -1,0 +1,39 @@
+# Anchor
+.anchor
+target/
+test-ledger/
+.DS_Store
+
+# Node
+node_modules/
+dist/
+*.log
+
+# IDL
+**/*.so
+**/*.so.*
+
+# Environment
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Rust
+Cargo.lock
+**/*.rs.bk
+
+# Solana
+.config/
+
+# Private & Sensitive Information
+TOKEN_DEPLOYMENT_PRIVATE.md
+*PRIVATE*.md
+*.private.md
+secrets/
+.secrets/

@@ -1,0 +1,26 @@
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info
+dist
+build
+.env
+.venv
+venv/
+node_modules/
+.git
+.gitignore
+README.md
+*.md
+.DS_Store
+solana-engine/node_modules/
+solana-engine/target/debug/
+solana-engine/target/deploy/
+solana-engine/target/release/
+solana-engine/.anchor/
+# Keep solana-engine/target/types/ - needed for TypeScript compilation
+# Keep solana-engine/target/idl/ - needed for Anchor workspace

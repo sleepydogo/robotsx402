@@ -1,0 +1,268 @@
+:root {
+    --bg-color: #0b0e11;
+    --card-bg: rgba(23, 28, 35, 0.8);
+    --primary: #00ffa3; 
+    --secondary: #dc1fff; 
+    --text-main: #ffffff;
+    --text-dim: #94a3b8;
+    --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px; /* Aumentado para dar aire al hacer scroll */
+    overflow-y: auto; /* SCROLL HABILITADO */
+}
+
+/* Background effects */
+.bg-glow {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        radial-gradient(circle at 20% 20%, rgba(220, 31, 255, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(0, 255, 163, 0.1) 0%, transparent 40%);
+    z-index: -1;
+}
+
+.container {
+    width: 100%;
+    max-width: 480px;
+}
+
+/* Logo specific style */
+/* Logo Container - This creates the circular frame */
+.logo-container {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.logo-img {
+    /* 1. Size of the circle */
+    width: 100px; 
+    height: 100px;
+    
+    /* 2. Clipping into a circle */
+    border-radius: 50%;
+    object-fit: cover; /* Ensures the image fills the circle without stretching */
+    
+    /* 3. Visual style */
+    border: 2px solid var(--primary);
+    background: var(--bg-color);
+    box-shadow: 0 0 20px rgba(0, 255, 163, 0.3);
+    
+    /* 4. ZOOM CONTROL */
+    transform: scale(1.0); /* Change this value to adjust zoom (e.g., 1.2 or 0.8) */
+    transition: transform 0.3s ease;
+}
+
+/* Optional: Subtle hover effect */
+.logo-img:hover {
+    transform: scale(1.1);
+}
+.card {
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 28px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    animation: cardAppear 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes cardAppear {
+    from { opacity: 0; transform: translateY(40px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Header */
+.header {
+    padding: 40px 30px 20px;
+    text-align: center;
+}
+
+h1 {
+    font-size: 2.2rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+}
+
+.highlight {
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+    color: var(--text-dim);
+    margin-top: 8px;
+    font-size: 0.95rem;
+}
+
+/* Content & Buttons */
+.content {
+    padding: 20px 30px 40px;
+}
+
+.btn {
+    width: 100%;
+    padding: 18px;
+    border-radius: 16px;
+    border: none;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-primary {
+    background: var(--text-main);
+    color: var(--bg-color);
+}
+
+.btn-primary:hover {
+    background: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(0, 255, 163, 0.4);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #00ffa3 0%, #03e1ff 100%);
+    color: #000;
+    margin-top: 10px;
+}
+
+.btn-success:hover {
+    filter: brightness(1.1);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0, 255, 163, 0.3);
+}
+
+/* Stats */
+.stats-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.info-box {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    padding: 20px;
+    border-radius: 20px;
+}
+
+.info-box.accent {
+    border-color: rgba(0, 255, 163, 0.2);
+    background: linear-gradient(135deg, rgba(0, 255, 163, 0.05), transparent);
+}
+
+.label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+}
+
+.address {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--primary);
+    word-break: break-all;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 8px;
+    border-radius: 8px;
+}
+
+.balance {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 5px;
+}
+
+.btn-text, .btn-refresh {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 0.75rem;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 5px 0;
+}
+
+/* Status Messages */
+.status {
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    text-align: center;
+    border-left: 4px solid transparent;
+}
+
+.status.success { background: rgba(16, 185, 129, 0.1); color: #10b981; border-color: #10b981; }
+.status.error { background: rgba(239, 68, 68, 0.1); color: #ef4444; border-color: #ef4444; }
+.status.loading { background: rgba(59, 130, 246, 0.1); color: #3b82f6; border-color: #3b82f6; }
+
+/* Badges */
+.network-info {
+    margin-top: 25px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.badge {
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    border: 1px solid var(--glass-border);
+}
+
+.badge-network { background: rgba(220, 31, 255, 0.1); color: var(--secondary); }
+.badge-mint { background: rgba(255, 255, 255, 0.05); color: var(--text-dim); }
+
+.footer {
+    padding: 20px;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.2);
+    color: var(--text-dim);
+}
+
+.hidden { display: none !important; }
+
+.section-fade {
+    animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.98); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@media (max-width: 480px) {
+    body { padding: 20px 10px; align-items: flex-start; } /* Mejora para móviles */
+}

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>rUSD Airdrop | Solana Devnet</title>
+        <!-- Favicon -->
+    <link rel="icon" href="static/logo.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="static/logo.ico" type="image/x-icon">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="bg-glow"></div>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <div class="logo-container">
+                    <img src="static/logo.png" alt="rUSD Logo" class="logo-img">
+                </div>
+                <h1>rUSD <span class="highlight">Airdrop</span></h1>
+                <p class="subtitle">Claim your tokens on Solana Devnet</p>
+            </div>
+
+            <div class="content">
+                <div id="walletSection" class="section-fade">
+                    <button id="connectBtn" class="btn btn-primary">
+                        <span>🔗 Connect Wallet</span>
+                    </button>
+                    <p class="hint">Compatible with Phantom, Solflare, and Backpack</p>
+                </div>
+
+                <div id="connectedSection" class="hidden section-fade">
+                    <div class="stats-grid">
+                        <div class="info-box">
+                            <p class="label">Your Wallet</p>
+                            <p id="walletAddress" class="address">-</p>
+                            <button id="disconnectBtn" class="btn-text">Disconnect</button>
+                        </div>
+
+                        <div class="info-box accent">
+                            <p class="label">Available Balance</p>
+                            <p id="balance" class="balance">0.00 rUSD</p>
+                            <button id="refreshBtn" class="btn-refresh">🔄 Refresh</button>
+                        </div>
+                    </div>
+
+                    <button id="airdropBtn" class="btn btn-success">
+                        🎁 Request 50 rUSD
+                    </button>
+
+                    <div id="statusMessage" class="status hidden"></div>
+                </div>
+
+                <div class="network-info">
+                    <span class="badge badge-network">Devnet</span>
+                    <span class="badge badge-mint">Mint: 8r2x...HtMX</span>
+                </div>
+            </div>
+
+            <div class="footer">
+                <p>⚠️ Exclusive for network testing purposes</p>
+                <p class="small">Limit: 1 airdrop per wallet every 24 hours</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
