@@ -17,6 +17,7 @@ import {
   Share2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import VideoStream from './VideoStream';
 
 // Chess pieces using Unicode symbols
 const PIECES = {
@@ -737,28 +738,14 @@ export default function ChessControl({ robot }: ChessControlProps) {
     <div className="space-y-6">
       {/* Video Stream - Full Width */}
       {robot.video_stream_url && (
-        <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-          <div className="flex items-center gap-3 border-b border-white/10 pb-4 mb-4">
-            <Video className="text-neon-cyan" size={20} />
-            <h3 className="text-white font-bold text-lg font-mono">ROBOT CAMERA - LIVE FEED</h3>
-            <div className="ml-auto flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse shadow-lg shadow-red-500/50" />
-              <span className="text-sm text-red-400 font-mono">LIVE</span>
-            </div>
-          </div>
-          <div className="bg-black rounded-lg overflow-hidden border border-white/10" style={{ height: '500px' }}>
-            <iframe
-              src={robot.video_stream_url}
-              className="w-full h-full"
-              style={{ border: 'none' }}
-              title="Robot camera feed"
-              allow="autoplay; fullscreen; picture-in-picture; camera; microphone"
-              allowFullScreen
-              sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-              loading="eager"
-            />
-          </div>
-        </div>
+        <VideoStream
+          streamUrl={robot.video_stream_url}
+          title="ROBOT CAMERA - LIVE FEED"
+          showHeader={true}
+          autoReconnect={true}
+          reconnectInterval={5000}
+          height="500px"
+        />
       )}
 
       {/* Main Game Area */}

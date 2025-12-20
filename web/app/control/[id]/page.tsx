@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { ArrowLeft, Activity, Wifi, WifiOff, Video, MapPin, AlertTriangle } from 'lucide-react'
 import { DynamicControl } from '@/components/robot-controls/DynamicControl'
 import ChessControl from '@/components/robot-controls/ChessControl'
+import VideoStream from '@/components/robot-controls/VideoStream'
 import Navbar from '@/components/dashboard/Navbar'
 import { apiClient } from '@/lib/api/client'
 import { useAuth } from '@/contexts/AuthContext'
@@ -258,19 +259,13 @@ export default function RobotControlPage() {
               <div className="space-y-6">
                 {/* Video Stream */}
                 {robot.video_stream_url && (
-                  <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Video className="w-5 h-5 text-neon-cyan" />
-                      <h3 className="text-white font-semibold font-mono">VIDEO FEED</h3>
-                    </div>
-                    <div className="aspect-video bg-black/40 rounded-lg flex items-center justify-center overflow-hidden border border-white/10">
-                      <img
-                        src={robot.video_stream_url}
-                        alt="Robot video stream"
-                        className="w-full h-full object-cover rounded-lg"
-                      />
-                    </div>
-                  </div>
+                  <VideoStream
+                    streamUrl={robot.video_stream_url}
+                    title="VIDEO FEED"
+                    showHeader={true}
+                    autoReconnect={true}
+                    reconnectInterval={5000}
+                  />
                 )}
 
                 {/* GPS Location */}

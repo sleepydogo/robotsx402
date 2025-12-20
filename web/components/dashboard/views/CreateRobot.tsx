@@ -74,10 +74,11 @@ export default function CreateRobot({ onCreated }: { onCreated?: () => void }) {
         },
       });
 
-      // Construct full image URL (backend serves static files at /uploads)
-      // NEXT_PUBLIC_API_URL is like http://localhost:8000/api, we need http://localhost:8000
-      const backendBaseUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:8000';
-      const imageUrl = `${backendBaseUrl}${response.data.image_url}`;
+      // Use the API URL to construct the full image URL
+      // NEXT_PUBLIC_API_URL is like https://api.robotsx402.fun/api
+      // We need to replace /api with the upload path to get: https://api.robotsx402.fun/uploads/robots/...
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+      const imageUrl = apiBaseUrl.replace('/api', response.data.image_url);
 
       // Update form data with image URL
       setFormData(prev => ({ ...prev, image_url: imageUrl }));
