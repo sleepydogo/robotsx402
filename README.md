@@ -4,6 +4,7 @@ ROBOTSx402 - A decentralized robot hardware rental platform where users/agents p
 
 ## 🔗 Links
 
+- [Demo Video](https://www.loom.com/share/54725dd322d8441386921fc5edd6f55e)
 - [Live Platform](https://robotsx402.fun/)
 - [Solana Program (Devnet)](https://explorer.solana.com/address/9LSXCUkD7BD3wjWjtC18qbrPAcfwdo4LVCER8j6CKEDj?cluster=devnet)
 - [rUSD Token](https://explorer.solana.com/address/8r2xLuDRsf6sVrdgTKoBM2gmWoixfXb5fzLyDqdEHtMX?cluster=devnet)
