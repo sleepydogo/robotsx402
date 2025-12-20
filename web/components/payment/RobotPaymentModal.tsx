@@ -157,15 +157,15 @@ export const RobotPaymentModal: React.FC<RobotPaymentModalProps> = ({
           />
 
           {/* Modal */}
-          <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 flex items-center justify-center z-50 p-4 overflow-y-auto">
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="bg-gradient-to-br from-gray-900 via-purple-900/30 to-gray-900 border border-white/10 rounded-2xl max-w-md w-full shadow-2xl overflow-hidden"
+              className="bg-gradient-to-br from-gray-900 via-purple-900/30 to-gray-900 border border-white/10 rounded-2xl max-w-md w-full shadow-2xl max-h-[90vh] flex flex-col my-8"
             >
               {/* Header */}
-              <div className="relative p-6 border-b border-white/10">
+              <div className="relative p-6 border-b border-white/10 flex-shrink-0">
                 <button
                   onClick={handleClose}
                   disabled={loading}
@@ -186,7 +186,7 @@ export const RobotPaymentModal: React.FC<RobotPaymentModalProps> = ({
               </div>
 
               {/* Body */}
-              <div className="p-6 space-y-6">
+              <div className="p-6 space-y-6 overflow-y-auto flex-1">
                 {/* Robot Info */}
                 <div className="bg-white/5 border border-white/10 rounded-lg p-4 flex items-center gap-4">
                   {robot.image_url && (

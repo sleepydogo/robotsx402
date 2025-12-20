@@ -7,7 +7,9 @@ from app.core.blockchain import get_payment_verifier
 from app.core.session import get_session_manager
 from app.models.user import User
 from app.models.payment import PaymentSessionDB
+from app.models.robot import Robot
 from app.schemas.payment import PaymentVerification, PaymentVerificationResponse
+from sqlalchemy import select
 
 router = APIRouter(prefix="/payments", tags=["Payments"])
 
@@ -59,6 +61,34 @@ async def verify_payment(
 
     # Mark session as paid
     await session_manager.mark_paid(session.id, verification.tx_signature)
+
+    # Get robot to determine lock duration
+    robot_query = select(Robot).where(Robot.id == session.robot_id)
+    robot_result = await db.execute(robot_query)
+    robot = robot_result.scalar_one_or_none()
+
+    # Determine lock duration from rental plan
+    duration_minutes = 10  # Default
+    if robot and robot.rental_plans and session.service_payload:
+        rental_plan_index = session.service_payload.get('rental_plan_index')
+        if rental_plan_index is not None and 0 <= rental_plan_index < len(robot.rental_plans):
+            selected_plan = robot.rental_plans[rental_plan_index]
+            duration_minutes = selected_plan.get('duration_minutes', 10)
+
+    # Lock the robot for exclusive use
+    lock_acquired = await session_manager.lock_robot(
+        robot_id=session.robot_id,
+        user_id=session.user_id,
+        duration_minutes=duration_minutes
+    )
+
+    if not lock_acquired:
+        # This shouldn't happen since we check before creating session,
+        # but handle it gracefully
+        raise HTTPException(
+            status_code=409,
+            detail="Robot is currently locked by another user"
+        )
 
     # Save to database for historical records
     db_session = PaymentSessionDB(

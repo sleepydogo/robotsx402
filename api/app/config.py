@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     ANTHROPIC_API_KEY: str = ""
 
     # CORS
-    CORS_ORIGINS: str = "https://robotsx402.fun,https://www.robotsx402.fun"
+    CORS_ORIGINS: str = "https://robotsx402.fun,https://www.robotsx402.fun,http://localhost:3000"
 
     class Config:
         env_file = ".env"

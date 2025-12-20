@@ -410,6 +410,49 @@ Generate ALL controls based on the API documentation. Be thorough!
         )
 
 
+@router.get("/{robot_id}/availability")
+async def check_robot_availability(
+    robot_id: str,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Check if a robot is available for use (not locked by another user)
+    Public endpoint - no auth required
+    """
+    from app.core.session import get_session_manager
+
+    # Check if robot exists
+    result = await db.execute(select(Robot).where(Robot.id == robot_id))
+    robot = result.scalar_one_or_none()
+
+    if not robot:
+        raise HTTPException(status_code=404, detail="Robot not found")
+
+    # Check if robot is locked
+    session_manager = get_session_manager()
+    is_locked = await session_manager.is_robot_locked(robot_id)
+
+    if not is_locked:
+        return {
+            "robot_id": robot_id,
+            "available": True,
+            "status": "available"
+        }
+
+    # Get lock info
+    lock_info = await session_manager.get_robot_lock_info(robot_id)
+    ttl = await session_manager.get_robot_ttl(robot_id)
+
+    return {
+        "robot_id": robot_id,
+        "available": False,
+        "status": "busy",
+        "locked_by_user_id": lock_info.get("user_id") if lock_info else None,
+        "time_remaining_seconds": ttl,
+        "time_remaining_minutes": (ttl // 60) if ttl else 0
+    }
+
+
 @router.get("/{robot_id}/metrics")
 async def get_robot_metrics(
     robot_id: str,

@@ -65,12 +65,28 @@ async def execute_robot(
 
             return result
 
+    # Check if robot is locked by another user
+    is_locked = await session_manager.is_robot_locked(robot_id)
+    if is_locked:
+        lock_info = await session_manager.get_robot_lock_info(robot_id)
+        ttl = await session_manager.get_robot_ttl(robot_id)
+
+        # If locked by another user, return error
+        if lock_info and str(lock_info.get('user_id')) != str(current_user.id):
+            minutes_remaining = (ttl // 60) if ttl else 0
+            raise HTTPException(
+                status_code=409,
+                detail=f"Robot is currently in use by another user. Try again in {minutes_remaining} minutes."
+            )
+
     # Calculate amount based on rental plan or base price
     amount = float(robot.price)
+    duration_minutes = 10  # Default duration
     if payload.rental_plan_index is not None and robot.rental_plans:
         if 0 <= payload.rental_plan_index < len(robot.rental_plans):
             selected_plan = robot.rental_plans[payload.rental_plan_index]
             amount = float(selected_plan.get('price', robot.price))
+            duration_minutes = selected_plan.get('duration_minutes', 10)
 
     # No valid paid session - create new session and return 402
     new_session = await session_manager.create_session(

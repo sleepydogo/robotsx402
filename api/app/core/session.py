@@ -117,6 +117,76 @@ class PaymentSessionManager:
         # Redis TTL handles this automatically
         pass
 
+    async def lock_robot(self, robot_id: str, user_id: str, duration_minutes: int) -> bool:
+        """
+        Lock a robot for exclusive use by a user
+        Returns True if lock acquired, False if already locked
+        """
+        lock_key = f"robot_lock:{robot_id}"
+
+        # Try to acquire lock (only set if not exists)
+        lock_data = {
+            "user_id": user_id,
+            "locked_at": datetime.utcnow().isoformat(),
+            "expires_in_minutes": duration_minutes
+        }
+
+        # Set lock with TTL equal to session duration
+        result = await self.redis_client.set(
+            lock_key,
+            json.dumps(lock_data),
+            nx=True,  # Only set if not exists
+            ex=duration_minutes * 60  # TTL in seconds
+        )
+
+        return result is not None
+
+    async def is_robot_locked(self, robot_id: str) -> bool:
+        """Check if a robot is currently locked"""
+        lock_key = f"robot_lock:{robot_id}"
+        lock_data = await self.redis_client.get(lock_key)
+        return lock_data is not None
+
+    async def get_robot_lock_info(self, robot_id: str) -> Optional[dict]:
+        """Get information about who has the robot locked"""
+        lock_key = f"robot_lock:{robot_id}"
+        lock_data = await self.redis_client.get(lock_key)
+
+        if not lock_data:
+            return None
+
+        try:
+            return json.loads(lock_data)
+        except:
+            return None
+
+    async def unlock_robot(self, robot_id: str, user_id: str) -> bool:
+        """
+        Unlock a robot (only if locked by the same user)
+        Returns True if unlocked successfully
+        """
+        lock_info = await self.get_robot_lock_info(robot_id)
+
+        if not lock_info:
+            return True  # Already unlocked
+
+        # Only unlock if same user
+        if lock_info.get("user_id") == user_id:
+            lock_key = f"robot_lock:{robot_id}"
+            await self.redis_client.delete(lock_key)
+            return True
+
+        return False
+
+    async def get_robot_ttl(self, robot_id: str) -> Optional[int]:
+        """Get remaining time (in seconds) for robot lock"""
+        lock_key = f"robot_lock:{robot_id}"
+        ttl = await self.redis_client.ttl(lock_key)
+
+        if ttl > 0:
+            return ttl
+        return None
+
 
 # Global session manager instance
 session_manager: Optional[PaymentSessionManager] = None

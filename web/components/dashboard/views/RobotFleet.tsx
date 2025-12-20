@@ -1,14 +1,16 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Filter, Clock, ChevronRight } from 'lucide-react';
 import { useRobots } from '@/lib/hooks/useRobots';
 import { useRouter } from 'next/navigation';
 import { RobotPaymentModal } from '@/components/payment/RobotPaymentModal';
+import { checkMultipleRobotAvailability, RobotAvailability } from '@/lib/api/robots';
 
 // --- CONSTANTS ---
 const CATEGORIES = ["All", "Bipedal", "Quadruped", "Industrial Arm", "Aerial"];
+const AVAILABILITY_CHECK_INTERVAL = 5000; // Check every 5 seconds
 
 const StatusBadge = ({ status }: { status: string }) => {
   const styles: any = {
@@ -33,6 +35,30 @@ export default function RobotFleet() {
   const [searchQuery, setSearchQuery] = useState("");
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [selectedRobot, setSelectedRobot] = useState<any>(null);
+  const [robotAvailability, setRobotAvailability] = useState<Record<string, RobotAvailability>>({});
+
+  // Check robot availability periodically
+  useEffect(() => {
+    const checkAvailability = async () => {
+      if (apiRobots.length === 0) return;
+
+      const robotIds = apiRobots.map(r => r.id);
+      try {
+        const availability = await checkMultipleRobotAvailability(robotIds);
+        setRobotAvailability(availability);
+      } catch (error) {
+        console.error('Error checking robot availability:', error);
+      }
+    };
+
+    // Check immediately
+    checkAvailability();
+
+    // Check periodically
+    const interval = setInterval(checkAvailability, AVAILABILITY_CHECK_INTERVAL);
+
+    return () => clearInterval(interval);
+  }, [apiRobots]);
 
   const ROBOTS = apiRobots.length > 0 ? apiRobots.map(robot => {
     // Find cheapest plan
@@ -40,15 +66,23 @@ export default function RobotFleet() {
       ? robot.rental_plans.reduce((min, plan) => plan.price < min.price ? plan : min)
       : { price: parseFloat(robot.price.toString()), duration_minutes: 10 };
 
+    // Determine actual status based on availability check
+    let actualStatus = robot.status === 'active' ? 'available' : robot.status;
+    const availability = robotAvailability[robot.id];
+    if (availability && !availability.available) {
+      actualStatus = 'busy';
+    }
+
     return {
       id: robot.id,
       name: robot.name,
       type: robot.services[0] || 'Unknown',
-      status: robot.status === 'active' ? 'available' : robot.status,
+      status: actualStatus,
       image: robot.image_url && robot.image_url.trim() !== '' ? robot.image_url : null,
       pricePerSec: parseFloat(robot.price.toString()),
       cheapestPlan: cheapestPlan,
-      location: "Buenos Aires"
+      location: "Buenos Aires",
+      timeRemaining: availability?.time_remaining_minutes
     };
   }) : [];
 
@@ -169,7 +203,13 @@ export default function RobotFleet() {
                     onClick={() => robot.status === 'available' && handleStartSession(robot)}
                     className={`w-full py-3 rounded font-mono font-bold text-sm flex items-center justify-center gap-2 transition-all relative overflow-hidden group/btn ${robot.status === 'available' ? "bg-neon-cyan text-cyber-black hover:bg-white" : "bg-white/5 text-gray-500 cursor-not-allowed border border-white/5"}`}
                   >
-                    {robot.status === 'available' ? <>START SESSION <ChevronRight size={16} className="group-hover/btn:translate-x-1 transition-transform" /></> : <>NOT AVAILABLE <Clock size={16} /></>}
+                    {robot.status === 'available' ? (
+                      <>START SESSION <ChevronRight size={16} className="group-hover/btn:translate-x-1 transition-transform" /></>
+                    ) : robot.status === 'busy' ? (
+                      <>IN USE {robot.timeRemaining && `(${robot.timeRemaining} min)`} <Clock size={16} /></>
+                    ) : (
+                      <>NOT AVAILABLE <Clock size={16} /></>
+                    )}
                   </button>
                 </div>
               </div>
