@@ -752,7 +752,10 @@ export default function ChessControl({ robot }: ChessControlProps) {
               className="w-full h-full"
               style={{ border: 'none' }}
               title="Robot camera feed"
-              allow="autoplay"
+              allow="autoplay; fullscreen; picture-in-picture; camera; microphone"
+              allowFullScreen
+              sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+              loading="eager"
             />
           </div>
         </div>
